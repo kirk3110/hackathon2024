@@ -5,6 +5,8 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
     times = np.arange(0, simulation_time, time_step)
     positions1 = []
     positions2 = []
+    stop_time1 = None
+    stop_time2 = None
 
     vel1 = calculate_velocity(angle1, speed1)
     vel2 = calculate_velocity(angle2, speed2)
@@ -19,10 +21,14 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
         vel1 = vel1 * decay  # 摩擦力を速度減衰で再現
         vel2 = vel2 * decay
 
-        if np.linalg.norm(vel1) <= 0.3:  # いつまでも微的な動きが続かないように停止判定
+        if stop_time1 is None and np.linalg.norm(vel1) <= 0.3:  # いつまでも微的な動きが続かないように停止判定
+            stop_time1 = t
             vel1 = np.array([0, 0])
-        if np.linalg.norm(vel2) <= 0.3:
+        if stop_time2 is None and np.linalg.norm(vel2) <= 0.3:
+            stop_time2 = t
             vel2 = np.array([0, 0])
+        if stop_time1 and stop_time2:
+            break
 
         if pos1 [0] + radius1 <= 0: #x=0地点の衝突 1についての壁の反発　壁は上下左右に10の幅であるとしています
             vel1[0] = vel1[0] *-1 * 1 #この1は反発係数
@@ -48,7 +54,7 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
             vel1 = v1 - 2 * mass2 / (mass1 + mass2) * np.dot(v1 - v2, pos1 - pos2) / np.linalg.norm(pos1 - pos2)**2 * (pos1 - pos2)
             vel2 = v2 - 2 * mass1 / (mass1 + mass2) * np.dot(v2 - v1, pos2 - pos1) / np.linalg.norm(pos2 - pos1)**2 * (pos2 - pos1)
 
-    return positions1, positions2
+    return positions1, positions2, stop_time1, stop_time2
 
 
 def calculate_velocity(angle, speed):
