@@ -1,29 +1,42 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import numpy as np
 from simulation import run_simulation
 
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
     # 初期条件の設定
     mass1 = 1.0  # 物体1の質量
     mass2 = 1.0  # 物体2の質量
     pos1 = np.array([0.0, 0.0])    # 物体1の初期位置 [x, y]
     pos2 = np.array([5.0, 5.0])    # 物体2の初期位置 [x, y]
-    vel1 = np.array([2.0, 1.0])    # 物体1の初期速度 [vx, vy]
-    vel2 = np.array([-1.0, -1.5])  # 物体2の初期速度 [vx, vy]
+    angle1 = 45   # 物体1の初期角度（度）
+    angle2 = 225  # 物体2の初期角度（度）
+    speed1 = 2.0  # 物体1の初期速度（大きさ）
+    speed2 = 2.5  # 物体2の初期速度（大きさ）
     radius1 = 0.5  # 物体1の半径
     radius2 = 0.5  # 物体2の半径
     simulation_time = 10.0  # シミュレーション時間
     time_step = 0.1         # シミュレーションの時間刻み
     decay = 0.97  # 速度の減衰係数
 
+    if request.method == 'POST':
+        # フォームからデータを取得
+        mass1 = float(request.form['mass1'])
+        mass2 = float(request.form['mass2'])
+        pos1 = [float(request.form['pos1_x']), float(request.form['pos1_y'])]
+        pos2 = [float(request.form['pos2_x']), float(request.form['pos2_y'])]
+        angle1 = float(request.form['angle1'])
+        angle2 = float(request.form['angle2'])
+        speed1 = float(request.form['speed1'])
+        speed2 = float(request.form['speed2'])
+
     # シミュレーションの実行
     positions1, positions2 = run_simulation(mass1, mass2,
                                             np.array(pos1), np.array(pos2),
-                                            np.array(vel1), np.array(vel2),
+                                            angle1, angle2, speed1, speed2,
                                             radius1, radius2,
                                             simulation_time, time_step, decay)
 
