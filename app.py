@@ -16,6 +16,7 @@ def home():
   radius2 = 0.5  # 物体2の半径
   simulation_time = 10.0  # シミュレーション時間
   time_step = 0.1         # シミュレーションの時間刻み
+  decay = 0.97 # 速度の減衰係数
 
   # シミュレーションの実行
   times = np.arange(0, simulation_time, time_step)
@@ -26,8 +27,12 @@ def home():
     positions1.append(pos1.copy())
     positions2.append(pos2.copy())
 
-    pos1 += vel1 * time_step
+    pos1 += vel1 * time_step #位置の更新
     pos2 += vel2 * time_step
+
+    vel1 == vel1 * decay #摩擦力を速度減衰で再現
+    vel2 == vel2 * decay
+
 
     if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
       # 完全弾性衝突の速度更新
