@@ -33,6 +33,10 @@ def home():
     vel1 = vel1 * decay #摩擦力を速度減衰で再現
     vel2 = vel2 * decay
 
+    if np.linalg.norm(vel1) <= 0.3 : #いつまでも微的な動きが続かないように停止判定
+      vel1 = np.array([0,0])
+    if np.linalg.norm(vel2) <= 0.3 :
+      vel2 = np.array([0,0])
 
     if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
       # 完全弾性衝突の速度更新
