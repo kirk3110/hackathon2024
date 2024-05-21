@@ -42,34 +42,34 @@
 <body>
 <form method="post">
     <label for="mass1">Mass 1:</label>
-    <input type="number" id="mass1" name="mass1" step="0.1" value="1.0" required>
+    <input type="number" id="mass1" name="mass1" step="0.1" value="{{ initial_conditions['mass1'] }}" required>
     <br>
     <label for="mass2">Mass 2:</label>
-    <input type="number" id="mass2" name="mass2" step="0.1" value="1.0" required>
+    <input type="number" id="mass2" name="mass2" step="0.1" value="{{ initial_conditions['mass2'] }}" required>
     <br>
     <label for="pos1_x">Position 1 X:</label>
-    <input type="number" id="pos1_x" name="pos1_x" step="0.1" value="0.0" required>
+    <input type="number" id="pos1_x" name="pos1_x" step="0.1" value="{{ initial_conditions['pos1_x'] }}" required>
     <br>
     <label for="pos1_y">Position 1 Y:</label>
-    <input type="number" id="pos1_y" name="pos1_y" step="0.1" value="0.0" required>
+    <input type="number" id="pos1_y" name="pos1_y" step="0.1" value="{{ initial_conditions['pos1_y'] }}" required>
     <br>
     <label for="pos2_x">Position 2 X:</label>
-    <input type="number" id="pos2_x" name="pos2_x" step="0.1" value="5.0" required>
+    <input type="number" id="pos2_x" name="pos2_x" step="0.1" value="{{ initial_conditions['pos2_x'] }}" required>
     <br>
     <label for="pos2_y">Position 2 Y:</label>
-    <input type="number" id="pos2_y" name="pos2_y" step="0.1" value="5.0" required>
+    <input type="number" id="pos2_y" name="pos2_y" step="0.1" value="{{ initial_conditions['pos2_y'] }}" required>
     <br>
     <label for="angle1">Angle 1:</label>
-    <input type="number" id="angle1" name="angle1" step="1" value="45" required>
+    <input type="number" id="angle1" name="angle1" step="0.1" value="{{ initial_conditions['angle1'] }}" required>
     <br>
     <label for="angle2">Angle 2:</label>
-    <input type="number" id="angle2" name="angle2" step="1" value="225" required>
+    <input type="number" id="angle2" name="angle2" step="0.1" value="{{ initial_conditions['angle2'] }}" required>
     <br>
     <label for="speed1">Speed 1:</label>
-    <input type="number" id="speed1" name="speed1" step="0.1" value="2.0" required>
+    <input type="number" id="speed1" name="speed1" step="0.1" value="{{ initial_conditions['speed1'] }}" required>
     <br>
     <label for="speed2">Speed 2:</label>
-    <input type="number" id="speed2" name="speed2" step="0.1" value="2.5" required>
+    <input type="number" id="speed2" name="speed2" step="0.1" value="{{ initial_conditions['speed2'] }}" required>
     <br>
     <button type="submit">Run Simulation</button>
 </form>
@@ -77,5 +77,12 @@
     <div class="object1"></div>
     <div class="object2"></div>
 </div>
+<script>
+    document.getElementById('simulation-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        this.submit();
+        document.querySelector('.simulation-container').classList.add('animate');
+    });
+</script>
 </body>
 </html>
