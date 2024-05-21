@@ -30,8 +30,8 @@ def home():
     pos1 += vel1 * time_step #位置の更新
     pos2 += vel2 * time_step
 
-    vel1 == vel1 * decay #摩擦力を速度減衰で再現
-    vel2 == vel2 * decay
+    vel1 = vel1 * decay #摩擦力を速度減衰で再現
+    vel2 = vel2 * decay
 
 
     if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
