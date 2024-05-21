@@ -24,22 +24,22 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
         if np.linalg.norm(vel2) <= 0.3:
             vel2 = np.array([0, 0])
 
-        if positions1 [0] + radius1 <= 0: #x=0地点の衝突 1についての壁の反発　壁は上下左右に10の幅であるとしています
+        if pos1 [0] + radius1 <= 0: #x=0地点の衝突 1についての壁の反発　壁は上下左右に10の幅であるとしています
             vel1[0] = vel1[0] *-1 * 1 #この1は反発係数
-        if positions1 [0] + radius1 >= 10: #x=10地点の衝突
+        if pos1 [0] + radius1 >= 10: #x=10地点の衝突
             vel1[0] = vel1[0] *-1 * 1 #この1は反発係数
-        if positions1 [1] + radius1 <= 0: #y=0地点の衝突
+        if pos1 [1] + radius1 <= 0: #y=0地点の衝突
             vel1[1] = vel1[1] *-1 * 1 #この1は反発係数
-        if positions1 [1] + radius1 >= 10: #y=10地点の衝突
+        if pos1 [1] + radius1 >= 10: #y=10地点の衝突
             vel1[1] = vel1[1] *-1 * 1 #この1は反発係数
 
-        if positions2 [0] + radius2 <= 0: #x=0地点の衝突　2についての壁の反発
+        if pos2 [0] + radius2 <= 0: #x=0地点の衝突　2についての壁の反発
             vel2[0] = vel2[0] *-1 * 1 #この1は反発係数
-        if positions2 [0] + radius2 >= 10: #x=10地点の衝突
+        if pos2 [0] + radius2 >= 10: #x=10地点の衝突
             vel2[0] = vel2[0] *-1 * 1 #この1は反発係数
-        if positions2 [1] + radius2 <= 0: #y=0地点の衝突
+        if pos2 [1] + radius2 <= 0: #y=0地点の衝突
             vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
-        if positions2 [1] + radius2 >= 10: #y=10地点の衝突
+        if pos2 [1] + radius2 >= 10: #y=10地点の衝突
             vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
 
         if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
