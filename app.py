@@ -25,7 +25,7 @@ def home():
         "radius1": 0.5,
         "radius2": 0.5,
         "simulation_time": 60.0,
-        "time_step": 0.1,
+        "time_step": 0.01,
         "decay": 0.97
     }
     winner = None
@@ -51,9 +51,9 @@ def home():
         if stop_time1 is None and stop_time2 is None or stop_time1 == stop_time2:
             winner = "Draw"
         elif stop_time1 is not None and (stop_time2 is None or stop_time1 < stop_time2):
-            winner = "Object 2"
+            winner = "Object 2 Win!"
         elif stop_time2 is not None and (stop_time1 is None or stop_time2 < stop_time1):
-            winner = "Object 1"
+            winner = "Object 1 Win!"
 
         # アニメーションのキーフレームを生成
         def generate_keyframes(positions, duration, scale):

@@ -1,104 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
     <style>
-        .simulation-container {
-            position: relative;
-            width: 600px;
-            height: 600px;
-            background-color: #f0f0f0;
-            overflow: hidden;
-            display: {{ 'block' if show_simulation else 'none' }};
-        }
+       html,body {
+           height: 100%;
+       }
+       .simulation-container {
+         position: relative;
+         height: 600px;
+         width: 600px;
+         background-color: #f0f0f0;
+         overflow: hidden;
+         display: {{ 'block' if show_simulation else 'none' }};
+       }
 
-        .object1, .object2 {
-            position: absolute;
-            width: {{ diameter1 }}px;
-            height: {{ diameter2 }}px;
-            border-radius: 50%;
-        }
-        .object1 {
-            background-color: red;
-            animation: move1 {{ duration }}s linear forwards;
-        }
-        .object2 {
-            background-color: blue;
-            animation: move2 {{ duration }}s linear forwards;
-        }
-        @keyframes move1 {
-        {{ frames1 }}
-        }
-        @keyframes move2 {
-        {{ frames2 }}
-        }
+       .object1, .object2 {
+         position: absolute;
+         width: {{ diameter1 }}px;
+         height: {{ diameter2 }}px;
+         border-radius: 50%;
+       }
+       .object1 {
+         background-color: red;
+         animation: move1 {{ duration }}s linear forwards;
+       }
+       .object2 {
+         background-color: blue;
+         animation: move2 {{ duration }}s linear forwards;
+       }
+       @keyframes move1 {
+           {{ frames1 }}
+       }
+       @keyframes move2 {
+           {{ frames2 }}
+       }
 
-        .winner {
-            display: none;
-            font-size: 24px;
-            margin-top: 20px;
-        }
+      .message {
+         position: absolute;
+         top: 240px;
+         left: 230px;
+         font-size: 24px;
+      }
     </style>
-</head>
-<body>
-<form method="post" id="simulation-form">
-    <label for="mass1">Mass 1:</label>
-    <input type="number" id="mass1" name="mass1" step="0.1" value="{{ initial_conditions['mass1'] }}" required>
-    <br>
-    <label for="mass2">Mass 2:</label>
-    <input type="number" id="mass2" name="mass2" step="0.1" value="{{ initial_conditions['mass2'] }}" required>
-    <br>
-    <label for="pos1_x">Position 1 X:</label>
-    <input type="number" id="pos1_x" name="pos1_x" step="0.1" value="{{ initial_conditions['pos1_x'] }}" required>
-    <br>
-    <label for="pos1_y">Position 1 Y:</label>
-    <input type="number" id="pos1_y" name="pos1_y" step="0.1" value="{{ initial_conditions['pos1_y'] }}" required>
-    <br>
-    <label for="pos2_x">Position 2 X:</label>
-    <input type="number" id="pos2_x" name="pos2_x" step="0.1" value="{{ initial_conditions['pos2_x'] }}" required>
-    <br>
-    <label for="pos2_y">Position 2 Y:</label>
-    <input type="number" id="pos2_y" name="pos2_y" step="0.1" value="{{ initial_conditions['pos2_y'] }}" required>
-    <br>
-    <label for="angle1">Angle 1:</label>
-    <input type="number" id="angle1" name="angle1" step="0.1" value="{{ initial_conditions['angle1'] }}" required>
-    <br>
-    <label for="angle2">Angle 2:</label>
-    <input type="number" id="angle2" name="angle2" step="0.1" value="{{ initial_conditions['angle2'] }}" required>
-    <br>
-    <label for="speed1">Speed 1:</label>
-    <input type="number" id="speed1" name="speed1" step="0.1" value="{{ initial_conditions['speed1'] }}" required>
-    <br>
-    <label for="speed2">Speed 2:</label>
-    <input type="number" id="speed2" name="speed2" step="0.1" value="{{ initial_conditions['speed2'] }}" required>
-    <br>
-    <button type="submit">Run Simulation</button>
-</form>
-<div class="simulation-container">
-    <div class="object1"></div>
-    <div class="object2"></div>
-</div>
+  </head>
+  <body>
+    <div class="container">
+      <form method="post" id="simulation-form">
+        <div class="row">
+          <div class="col-md-2 col-6">
+            <label for="mass1">Mass 1:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="mass1"
+              name="mass1"
+              step="0.1"
+              value="{{ initial_conditions['mass1'] }}"
+              required
+            />
 
-<h2 id="winner" class="winner">Winner: {{ winner }}</h2>
+            <label for="mass2">Mass 2:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="mass2"
+              name="mass2"
+              step="0.1"
+              value="{{ initial_conditions['mass2'] }}"
+              required
+            />
 
-<script>
-    document.getElementById('simulation-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        this.submit();
-        document.querySelector('.simulation-container').classList.add('animate');
-    });
+            <label for="pos1_x">Position 1 X:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos1_x"
+              name="pos1_x"
+              step="0.1"
+              value="{{ initial_conditions['pos1_x'] }}"
+              required
+            />
 
-    let animationsCompleted = 0;
-    document.querySelector('.object1').addEventListener('animationend', checkWinner);
-    document.querySelector('.object2').addEventListener('animationend', checkWinner);
+            <label for="pos1_y">Position 1 Y:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos1_y"
+              name="pos1_y"
+              step="0.1"
+              value="{{ initial_conditions['pos1_y'] }}"
+              required
+            />
 
-    function checkWinner() {
+            <label for="pos2_x">Position 2 X:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos2_x"
+              name="pos2_x"
+              step="0.1"
+              value="{{ initial_conditions['pos2_x'] }}"
+              required
+            />
+
+            <label for="pos2_y">Position 2 Y:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos2_y"
+              name="pos2_y"
+              step="0.1"
+              value="{{ initial_conditions['pos2_y'] }}"
+              required
+            />
+          </div>
+          <div class="col-md-2 col-6">
+            <label for="angle1">Angle 1:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="angle1"
+              name="angle1"
+              step="0.1"
+              value="{{ initial_conditions['angle1'] }}"
+              required
+            />
+
+            <label for="angle2">Angle 2:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="angle2"
+              name="angle2"
+              step="0.1"
+              value="{{ initial_conditions['angle2'] }}"
+              required
+            />
+
+            <label for="speed1">Speed 1:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="speed1"
+              name="speed1"
+              step="0.1"
+              value="{{ initial_conditions['speed1'] }}"
+              required
+            />
+
+            <label for="speed2">Speed 2:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="speed2"
+              name="speed2"
+              step="0.1"
+              value="{{ initial_conditions['speed2'] }}"
+              required
+            />
+
+            <button class="btn btn-primary m-2" type="submit">
+              Run Simulation
+            </button>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="simulation-container m-2">
+              <div class="object1"></div>
+              <div class="object2"></div>
+              <div id="message" class="message row"></div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <script>
+      document
+        .getElementById("simulation-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          this.submit();
+          document
+            .querySelector(".simulation-container")
+            .classList.add("animate");
+        });
+
+      let animationsCompleted = 0;
+      document
+        .querySelector(".object1")
+        .addEventListener("animationend", checkWinner);
+      document
+        .querySelector(".object2")
+        .addEventListener("animationend", checkWinner);
+
+      function checkWinner() {
         animationsCompleted += 1;
         if (animationsCompleted === 2) {
-            document.getElementById('winner').style.display = 'block';
+          document.getElementById("message").textContent = "{{ winner }}";
         }
-    }
-</script>
-</body>
+      }
+    </script>
+  </body>
 </html>
