@@ -35,7 +35,7 @@ def get_enemy_parameters():
 # 敵キャラクターのパラメータを事前に設定したパターンから選択
 def get_field_parameters():
     field_patterns = [
-        Field(0.98),
+        Field(0.97),
     ]
     return random.choice(field_patterns)
 
