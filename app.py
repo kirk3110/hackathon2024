@@ -51,9 +51,9 @@ def home():
         if stop_time1 is None and stop_time2 is None or stop_time1 == stop_time2:
             winner = "Draw"
         elif stop_time1 is not None and (stop_time2 is None or stop_time1 < stop_time2):
-            winner = "Object 2"
+            winner = "Object 2 Win!"
         elif stop_time2 is not None and (stop_time1 is None or stop_time2 < stop_time1):
-            winner = "Object 1"
+            winner = "Object 1 Win!"
 
         # アニメーションのキーフレームを生成
         def generate_keyframes(positions, duration, scale):
