@@ -25,7 +25,7 @@ def home():
         "radius1": 0.5,
         "radius2": 0.5,
         "simulation_time": 60.0,
-        "time_step": 0.01,
+        "time_step": 0.1,
         "decay": 0.97
     }
     winner = None
