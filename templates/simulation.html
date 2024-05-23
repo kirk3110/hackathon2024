@@ -21,18 +21,19 @@
          overflow: hidden;
          display: {{ 'block' if show_simulation else 'none' }};
        }
-
-       .object1, .object2 {
+       .player, .enemy {
          position: absolute;
-         width: {{ diameter1 }}px;
-         height: {{ diameter2 }}px;
          border-radius: 50%;
        }
-       .object1 {
+       .player {
+         width: {{ player_diameter }}px;
+         height: {{ player_diameter }}px;
          background-color: red;
          animation: move1 {{ duration }}s linear forwards;
        }
-       .object2 {
+       .enemy {
+         width: {{ enemy_diameter }}px;
+         height: {{ enemy_diameter }}px;
          background-color: blue;
          animation: move2 {{ duration }}s linear forwards;
        }
@@ -56,125 +57,28 @@
       <form method="post" id="simulation-form">
         <div class="row">
           <div class="col-md-2 col-6">
-            <label for="mass1">Mass 1:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="mass1"
-              name="mass1"
-              step="0.1"
-              value="{{ initial_conditions['mass1'] }}"
-              required
-            />
-
-            <label for="mass2">Mass 2:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="mass2"
-              name="mass2"
-              step="0.1"
-              value="{{ initial_conditions['mass2'] }}"
-              required
-            />
-
-            <label for="pos1_x">Position 1 X:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="pos1_x"
-              name="pos1_x"
-              step="0.1"
-              value="{{ initial_conditions['pos1_x'] }}"
-              required
-            />
-
-            <label for="pos1_y">Position 1 Y:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="pos1_y"
-              name="pos1_y"
-              step="0.1"
-              value="{{ initial_conditions['pos1_y'] }}"
-              required
-            />
-
-            <label for="pos2_x">Position 2 X:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="pos2_x"
-              name="pos2_x"
-              step="0.1"
-              value="{{ initial_conditions['pos2_x'] }}"
-              required
-            />
-
-            <label for="pos2_y">Position 2 Y:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="pos2_y"
-              name="pos2_y"
-              step="0.1"
-              value="{{ initial_conditions['pos2_y'] }}"
-              required
-            />
-          </div>
-          <div class="col-md-2 col-6">
-            <label for="angle1">Angle 1:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="angle1"
-              name="angle1"
-              step="0.1"
-              value="{{ initial_conditions['angle1'] }}"
-              required
-            />
-
-            <label for="angle2">Angle 2:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="angle2"
-              name="angle2"
-              step="0.1"
-              value="{{ initial_conditions['angle2'] }}"
-              required
-            />
-
-            <label for="speed1">Speed 1:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="speed1"
-              name="speed1"
-              step="0.1"
-              value="{{ initial_conditions['speed1'] }}"
-              required
-            />
-
-            <label for="speed2">Speed 2:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="speed2"
-              name="speed2"
-              step="0.1"
-              value="{{ initial_conditions['speed2'] }}"
-              required
-            />
-
             <button class="btn btn-primary m-2" type="submit">
               Run Simulation
             </button>
+            <div class="card m-2">
+              <div class="card-body">
+                <h5 class="card-title">Player</h5>
+                <p class="card-text">Initial Speed: {{ player_speed }}</p>
+                <p class="card-text">Diameter: {{ player_diameter }}</p>
+                <p class="card-text">Mass: {{ player_mass }}</p>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">Enemy</h5>
+                <p class="card-text">Initial Speed: {{ enemy_speed }}</p>
+                <p class="card-text">Diameter: {{ enemy_diameter }}</p>
+                <p class="card-text">Mass: {{ enemy_mass }}</p>
+              </div>
+            </div>
           </div>
           <div class="col-12 col-md-6">
             <div class="simulation-container m-2">
-              <div class="object1"></div>
-              <div class="object2"></div>
+              <div class="player"></div>
+              <div class="enemy"></div>
               <div id="message" class="message row"></div>
             </div>
           </div>
@@ -182,6 +86,20 @@
       </form>
     </div>
     <script>
+      // ローカルストレージからプレイヤー情報を取得してサーバーに送信
+      let playerParameters = localStorage.getItem('player');
+
+      fetch('/update_player', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(playerParameters),
+      })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch((error) => console.error('Error:', error));
+
       document
         .getElementById("simulation-form")
         .addEventListener("submit", function (event) {
@@ -194,10 +112,10 @@
 
       let animationsCompleted = 0;
       document
-        .querySelector(".object1")
+        .querySelector(".player")
         .addEventListener("animationend", checkWinner);
       document
-        .querySelector(".object2")
+        .querySelector(".enemy")
         .addEventListener("animationend", checkWinner);
 
       function checkWinner() {
