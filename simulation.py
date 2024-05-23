@@ -1,15 +1,12 @@
 import numpy as np
 
-def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, radius1, radius2, simulation_time, time_step, decay):
+def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simulation_time, time_step, decay):
     # シミュレーションの実行
     times = np.arange(0, simulation_time, time_step)
     positions1 = []
     positions2 = []
     stop_time1 = None
     stop_time2 = None
-
-    vel1 = calculate_velocity(angle1, speed1)
-    vel2 = calculate_velocity(angle2, speed2)
 
     for t in times:
         positions1.append(pos1.copy())
