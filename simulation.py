@@ -49,12 +49,20 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
         if pos2 [1] + radius2 >= 10: #y=10地点の衝突
             vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
 
-        gravtyangle1 = math.degrees(math.atan2(vel1[1]-5,vel1[0]-5)) #1の中心に対する角度 arctan
-        vel1[0] = vel1[0] + (9.81*math.sin(math.radians(10))*math.cos(math.degrees(gravtyangle1))*time_step) #1のx方向に対する速度の重力加速を考慮した更新
-        vel1[1] = vel1[1] + (9.81*math.sin(math.radians(10))*math.sin(math.degrees(gravtyangle1))*time_step) #1のy方向に対する速度の重力加速更新
-        gravtyangle2 = math.degrees(math.atan2(vel2[1]-5,vel2[0]-5)) #1の中心に対する角度 arctan
-        vel2[0] = vel2[0] + (9.81*math.sin(math.radians(10))*math.cos(math.degrees(gravtyangle2))*time_step) #2のx方向に対する速度の重力加速を考慮した更新
-        vel2[1] = vel2[1] + (9.81*math.sin(math.radians(10))*math.sin(math.degrees(gravtyangle2))*time_step) #2のy方向に対する速度の重力加速更新
+        #gravtyangle1 = math.degrees(math.atan2(vel1[1]-5,vel1[0]-5)) #1の中心に対する角度 arctan
+        #vel1[0] = vel1[0] + (9.81*math.sin(math.radians(10))*math.cos(math.degrees(gravtyangle1))*time_step) #1のx方向に対する速度の重力加速を考慮した更新
+        #vel1[1] = vel1[1] + (9.81*math.sin(math.radians(10))*math.sin(math.degrees(gravtyangle1))*time_step) #1のy方向に対する速度の重力加速更新
+        #gravtyangle2 = math.degrees(math.atan2(vel2[1]-5,vel2[0]-5)) #1の中心に対する角度 arctan
+        #vel2[0] = vel2[0] + (9.81*math.sin(math.radians(10))*math.cos(math.degrees(gravtyangle2))*time_step) #2のx方向に対する速度の重力加速を考慮した更新
+        #vel2[1] = vel2[1] + (9.81*math.sin(math.radians(10))*math.sin(math.degrees(gravtyangle2))*time_step) #2のy方向に対する速度の重力加速更新
+        #ベクトルを用いた重力にするために上記コメントアウト
+        k = 9.81*math.sin(math.radians(10)) #重力加速度(平面方向)
+        pos0 = np.array([5.0, 5.0]) #原点座標
+        acc1 = - k * (pos1 - pos0)  #原点方向の加速度
+        vel1 = acc1 * time_step #速度更新 
+        acc2 = - k * (pos1 - pos0)
+        vel2 = acc2 * time_step
+            
 
         if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
             # 完全弾性衝突の速度更新
