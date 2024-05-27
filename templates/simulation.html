@@ -19,7 +19,7 @@
          width: 600px;
          background-color: #f0f0f0;
          overflow: hidden;
-         display: {{ 'block' if show_simulation else 'none' }};
+         display: block;
        }
 
        .object1, .object2 {
@@ -42,6 +42,14 @@
        @keyframes move2 {
            {{ frames2 }}
        }
+
+        #drawingArea {
+            width: 100%
+            height: 100%
+        }
+        #velocityArrow {
+            fill: lime;
+        }
 
       .message {
          position: absolute;
@@ -121,49 +129,26 @@
               value="{{ initial_conditions['pos2_y'] }}"
               required
             />
-          </div>
-          <div class="col-md-2 col-6">
-            <label for="angle1">Angle 1:</label>
+
+            <label for="vel1_x">Velocity 1 X:</label>
             <input
               class="form-control form-control-sm"
               type="number"
-              id="angle1"
-              name="angle1"
+              id="vel1_x"
+              name="vel1_x"
               step="0.1"
-              value="{{ initial_conditions['angle1'] }}"
+              value="{{ initial_conditions['vel1_x'] }}"
               required
             />
 
-            <label for="angle2">Angle 2:</label>
+            <label for="vel1_y">Velocity1 Y:</label>
             <input
               class="form-control form-control-sm"
               type="number"
-              id="angle2"
-              name="angle2"
+              id="vel1_y"
+              name="vel1_y"
               step="0.1"
-              value="{{ initial_conditions['angle2'] }}"
-              required
-            />
-
-            <label for="speed1">Speed 1:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="speed1"
-              name="speed1"
-              step="0.1"
-              value="{{ initial_conditions['speed1'] }}"
-              required
-            />
-
-            <label for="speed2">Speed 2:</label>
-            <input
-              class="form-control form-control-sm"
-              type="number"
-              id="speed2"
-              name="speed2"
-              step="0.1"
-              value="{{ initial_conditions['speed2'] }}"
+              value="{{ initial_conditions['vel1_y'] }}"
               required
             />
 
@@ -172,7 +157,10 @@
             </button>
           </div>
           <div class="col-12 col-md-6">
-            <div class="simulation-container m-2">
+            <div id="screen" class="simulation-container m-2">
+              <svg id="drawingArea"width="600" height="600">
+                <polygon id="velocityArrow" points="0,0 0,0 0,0" />
+              </svg>
               <div class="object1"></div>
               <div class="object2"></div>
               <div id="message" class="message row"></div>
@@ -206,6 +194,68 @@
           document.getElementById("message").textContent = "{{ winner }}";
         }
       }
+
+      // 開始点と終了点の座標
+      let startX, startY, endX, endY;
+      // 入力線分の長さと速度の比
+      const px2velRatio = 0.1;
+      // ドラッグが開始されたときの処理
+      function handleDragStart(event) {
+        if(event.button !== 0) { //左クリックのみ取得
+            return;
+        }
+        startX = event.clientX;
+        startY = event.clientY;
+      }
+
+      // ドラッグ中の処理
+      function handleDragging(event) {
+        if (!startX) {
+          return;
+        }
+        endX = event.clientX;
+        endY = event.clientY;
+        // 速度ベクトルを描画
+        const screen = document.querySelector("#screen");
+        const offsetX = screen.offsetLeft;
+        const offsetY = screen.offsetTop;
+        let diffX = endX - startX;
+        let diffY = endY - startY;
+        let p1 = startX - offsetX + "," + (startY - offsetY);
+        let p2 =
+          endX - offsetX - diffY / 4 + "," + (endY - offsetY + diffX / 4);
+        let p3 =
+          endX - offsetX + diffY / 4 + "," + (endY - offsetY - diffX / 4);
+
+        document
+          .getElementById("velocityArrow")
+          .setAttribute("points", p1 + " " + p2 + " " + p3);
+      }
+
+      // ドラッグが終了したときの処理
+      function handleDragEnd(event) {
+        if (!startX) {
+          return;
+        }
+        endX = event.clientX;
+        endY = event.clientY;
+
+        // 開始点と終了点の座標を使用して速度を計算
+        document.getElementById("vel1_x").value = px2velRatio * (startX - endX);
+        document.getElementById("vel1_y").value = px2velRatio * (startY - endY);
+
+        // 値を送信
+        document
+          .querySelector(".simulation-container")
+          .classList.add("animate");
+        document.getElementById("simulation-form").submit();
+      }
+
+      const screen = document.getElementById("screen");
+
+      screen.addEventListener("mousedown", handleDragStart);
+      document.addEventListener("mousemove", handleDragging);
+      document.addEventListener("mouseup", handleDragEnd);
     </script>
   </body>
 </html>
