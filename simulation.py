@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, radius1, radius2, simulation_time, time_step, decay):
     # シミュレーションの実行
@@ -47,6 +48,15 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
             vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
         if pos2 [1] + radius2 >= 10: #y=10地点の衝突
             vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
+
+        #ベクトルを用いた重力にするために上記コメントアウト
+        k = 9.81*math.sin(math.radians(10))  #重力加速度(平面方向)
+        pos0 = np.array([5.0, 5.0]) #原点座標
+        acc1 = k * (pos0 - pos1)  #原点方向の加速度
+        vel1 = vel1 + acc1 * time_step #速度更新 
+        acc2 = k * (pos0 - pos2) 
+        vel2 = vel2 + acc2 * time_step
+            
 
         if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
             # 完全弾性衝突の速度更新
