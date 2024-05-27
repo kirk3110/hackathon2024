@@ -8,6 +8,7 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
     positions2 = []
     stop_time1 = None
     stop_time2 = None
+    collision_points = []
 
     vel1 = calculate_velocity(angle1, speed1)
     vel2 = calculate_velocity(angle2, speed2)
@@ -57,14 +58,14 @@ def run_simulation(mass1, mass2, pos1, pos2, angle1, angle2, speed1, speed2, rad
         acc2 = k * (pos0 - pos2) 
         vel2 = vel2 + acc2 * time_step
             
-
         if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
             # 完全弾性衝突の速度更新
             v1, v2 = vel1.copy(), vel2.copy()
             vel1 = v1 - 2 * mass2 / (mass1 + mass2) * np.dot(v1 - v2, pos1 - pos2) / np.linalg.norm(pos1 - pos2)**2 * (pos1 - pos2)
             vel2 = v2 - 2 * mass1 / (mass1 + mass2) * np.dot(v2 - v1, pos2 - pos1) / np.linalg.norm(pos2 - pos1)**2 * (pos2 - pos1)
+            collision_points.append((t, (pos1 + pos2) /2))
 
-    return positions1, positions2, stop_time1, stop_time2
+    return positions1, positions2, stop_time1, stop_time2, collision_points
 
 
 def calculate_velocity(angle, speed):

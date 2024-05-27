@@ -67,7 +67,7 @@ def index():
         show_simulation = True
 
         # シミュレーションの実行
-        positions1, positions2, stop_time1, stop_time2 = run_simulation(
+        positions1, positions2, stop_time1, stop_time2, collision_points = run_simulation(
             player.mass, enemy.mass
             , player.pos, enemy.pos
             , player.angle, enemy.angle
@@ -92,7 +92,9 @@ def index():
                                show_simulation=show_simulation,
                                frames1=frames1,
                                frames2=frames2,
+                               collision_points = collision_points,
                                duration=duration,
+                               scale=scale,
                                player_diameter=player.radius*2*scale,
                                player_speed=player.speed,
                                player_mass=player.mass,
