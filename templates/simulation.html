@@ -25,6 +25,23 @@
          position: absolute;
          border-radius: 50%;
        }
+       .object-inner {
+          width: 100%;
+          height: 100%;
+          border: dashed;
+          border-width: 5px;
+          border-radius: 50%;
+          border-color: rgba(255, 255, 255, 0.9);
+          animation:1s linear infinite rotation1;
+        }
+        @keyframes rotation1{
+          0%{ transform:rotate(0); }
+          100%{ transform:rotate(360deg); }
+        }
+       .object-inner.lose{
+          animation:10s linear infinite rotation1;
+          border-color: rgba(0, 0, 0, 0.9);
+       }
        .player {
          width: {{ player_diameter }}px;
          height: {{ player_diameter }}px;
@@ -77,8 +94,12 @@
           </div>
           <div class="col-12 col-md-6">
             <div class="simulation-container m-2">
-              <div class="player"></div>
-              <div class="enemy"></div>
+              <div class="player">
+                <div class="object-inner"></div>
+              </div>
+              <div class="enemy">
+                <div class="object-inner"></div>
+              </div>
               <div id="message" class="message row"></div>
             </div>
           </div>
@@ -120,6 +141,9 @@
 
       function checkWinner() {
         animationsCompleted += 1;
+        if (animationsCompleted === 1) {
+          this.querySelector(".object-inner").classList.add("lose")
+        }
         if (animationsCompleted === 2) {
           document.getElementById("message").textContent = "{{ winner }}";
         }
