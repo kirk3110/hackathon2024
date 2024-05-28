@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for
+import os
+
+from flask import Flask, render_template, request, redirect, url_for, session
 import numpy as np
 
 from custom_part import CustomPart
@@ -6,8 +8,8 @@ from object import Object
 from simulation import run_simulation
 
 app = Flask(__name__)
-
-object1 = Object(1.0, 0.5)
+# 環境変数からシークレットキーを取得
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -27,9 +29,14 @@ def home():
         "vel2_y": 4.0,
         "simulation_time": 60.0,
         "time_step": 0.1,
-        "decay": 0.97
+        "decay": 0.99
     }
-    object2 = Object(1.0, 0.5)
+    if 'object1' in session:
+        object1 = Object(**session['object1'])
+    else:
+        object1 = Object(1.0, 0.5, 0.98, 1.0)
+        session['object1'] = object1.map()
+    object2 = Object(1.0, 0.5, 0.98, 1.0)
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
 
@@ -102,19 +109,27 @@ def home():
 def reward():
     # 一旦決め打ち。いずれファイルかDBから読み込む
     custom_parts = {
-        1: CustomPart("Lightning Body", "Halve the mass.",
-                      mass_value=0.5, mass_calculation='*'),
+        1: CustomPart("Gravity Negator", "Half the mass.",
+                      mass_value=0.5, mass_calculation='multiple'),
         2: CustomPart("Giant Growth", "Double the diameter.",
-                      radius_value=2.0, radius_calculation='*'),
-        3: CustomPart("Super Lightning Body", "Quarter the mass.",
-                      mass_value=0.25, mass_calculation='*'),
-        4: CustomPart("Super Giant Growth", "Quadruple the diameter.",
-                      radius_value=4.0, radius_calculation='*'),
+                      radius_value=2.0, radius_calculation='multiple'),
+        3: CustomPart("Overencumbered", "Double the mass.",
+                      mass_value=2.0, mass_calculation='multiple'),
+        4: CustomPart("Shrink", "Half the diameter.",
+                      radius_value=0.5, radius_calculation='multiple'),
+        5: CustomPart("Full Steam Ahead", "Improve velocity decay by 10%.",
+                      improve_decay_value=0.1),
+        6: CustomPart("Rage Reflection", "Increase restitution by 10%. (Maximum 2.0)",
+                      restitution_value=0.1, restitution_calculation='add')
     }
+    if 'object1' in session:
+        object1 = Object(**session['object1'])
+    else:
+        # セッションにオブジェクトがない場合は最初に戻る
+        return redirect(url_for('home'))
 
     # GETリクエストの場合、報酬としてカスタムパーツを表示
     if request.method == 'GET':
-        print("get")
         # カスタムパーツリストからランダムに3つ選択
         import random
         selected_parts_keys = random.sample(list(custom_parts.keys()), 3)
@@ -133,17 +148,19 @@ def reward():
     # POSTリクエストの場合は、選択されたカスタムパーツを適用
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
         selected_part = custom_parts[int(data['id'])]
-        if 'mass_value' in selected_part.__dict__:
-            expression = f"{object1.mass}{selected_part.mass_calculation}{selected_part.mass_value}"
-            object1.mass = eval(expression)
-        if 'radius_value' in selected_part.__dict__:
-            expression = f"{object1.radius}{selected_part.radius_calculation}{selected_part.radius_value}"
-            object1.radius = eval(expression)
+        object1 = selected_part.update(object1)
+        session['object1'] = object1.map()
 
         # シミュレーション画面にリダイレクト
         return redirect(url_for('home'))
+
+
+@app.before_request
+def clear_session():
+    # 遷移元も遷移先も/のときはセッションをクリア
+    if request.path == '/' and request.referrer == request.url_root:
+        session.clear()
 
 
 if __name__ == '__main__':
