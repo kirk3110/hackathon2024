@@ -19,10 +19,13 @@
          width: 600px;
          background-color: #f0f0f0;
          overflow: hidden;
-         display: {{ 'block' if show_simulation else 'none' }};
+         display: block;
        }
-       .player, .enemy {
+
+       .object1, .object2 {
          position: absolute;
+         width: {{ diameter1 }}px;
+         height: {{ diameter2 }}px;
          border-radius: 50%;
        }
        .object-inner {
@@ -41,16 +44,13 @@
        .object-inner.lose{
           animation:10s linear infinite rotation1;
           border-color: rgba(0, 0, 0, 0.9);
+          background-color: rgba(0, 0, 0, 0.5);
        }
-       .player {
-         width: {{ player_diameter }}px;
-         height: {{ player_diameter }}px;
+       .object1 {
          background-color: red;
          animation: move1 {{ duration }}s linear forwards;
        }
-       .enemy {
-         width: {{ enemy_diameter }}px;
-         height: {{ enemy_diameter }}px;
+       .object2 {
          background-color: blue;
          animation: move2 {{ duration }}s linear forwards;
        }
@@ -60,6 +60,14 @@
        @keyframes move2 {
            {{ frames2 }}
        }
+
+        #drawingArea {
+            width: 100%
+            height: 100%
+        }
+        #velocityArrow {
+            fill: lime;
+        }
 
       .message {
          position: absolute;
@@ -74,30 +82,107 @@
       <form method="post" id="simulation-form">
         <div class="row">
           <div class="col-md-2 col-6">
+            <label for="mass1">Mass 1:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="mass1"
+              name="mass1"
+              step="0.1"
+              value="{{ initial_conditions['mass1'] }}"
+              required
+            />
+
+            <label for="mass2">Mass 2:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="mass2"
+              name="mass2"
+              step="0.1"
+              value="{{ initial_conditions['mass2'] }}"
+              required
+            />
+
+            <label for="pos1_x">Position 1 X:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos1_x"
+              name="pos1_x"
+              step="0.1"
+              value="{{ initial_conditions['pos1_x'] }}"
+              required
+            />
+
+            <label for="pos1_y">Position 1 Y:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos1_y"
+              name="pos1_y"
+              step="0.1"
+              value="{{ initial_conditions['pos1_y'] }}"
+              required
+            />
+
+            <label for="pos2_x">Position 2 X:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos2_x"
+              name="pos2_x"
+              step="0.1"
+              value="{{ initial_conditions['pos2_x'] }}"
+              required
+            />
+
+            <label for="pos2_y">Position 2 Y:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="pos2_y"
+              name="pos2_y"
+              step="0.1"
+              value="{{ initial_conditions['pos2_y'] }}"
+              required
+            />
+
+            <label for="vel1_x">Velocity 1 X:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="vel1_x"
+              name="vel1_x"
+              step="0.1"
+              value="{{ initial_conditions['vel1_x'] }}"
+              required
+            />
+
+            <label for="vel1_y">Velocity1 Y:</label>
+            <input
+              class="form-control form-control-sm"
+              type="number"
+              id="vel1_y"
+              name="vel1_y"
+              step="0.1"
+              value="{{ initial_conditions['vel1_y'] }}"
+              required
+            />
+
             <button class="btn btn-primary m-2" type="submit">
               Run Simulation
             </button>
-            <div class="card m-2">
-              <div class="card-body">
-                <h5 class="card-title">Player</h5>
-                <p class="card-text">Initial Speed: {{ player_speed }}</p>
-                <p class="card-text">Diameter: {{ player_diameter }}</p>
-                <p class="card-text">Mass: {{ player_mass }}</p>
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">Enemy</h5>
-                <p class="card-text">Initial Speed: {{ enemy_speed }}</p>
-                <p class="card-text">Diameter: {{ enemy_diameter }}</p>
-                <p class="card-text">Mass: {{ enemy_mass }}</p>
-              </div>
-            </div>
           </div>
           <div class="col-12 col-md-6">
-            <div class="simulation-container m-2">
-              <div class="player">
+            <div id="screen" class="simulation-container m-2">
+              <svg id="drawingArea"width="600" height="600">
+                <polygon id="velocityArrow" points="0,0 0,0 0,0" />
+              </svg>
+              <div class="object1">
                 <div class="object-inner"></div>
               </div>
-              <div class="enemy">
+              <div class="object2">
                 <div class="object-inner"></div>
               </div>
               <div id="message" class="message row"></div>
@@ -107,20 +192,6 @@
       </form>
     </div>
     <script>
-      // ローカルストレージからプレイヤー情報を取得してサーバーに送信
-      let playerParameters = localStorage.getItem('player');
-
-      fetch('/update_player', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(playerParameters),
-      })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch((error) => console.error('Error:', error));
-
       document
         .getElementById("simulation-form")
         .addEventListener("submit", function (event) {
@@ -133,10 +204,10 @@
 
       let animationsCompleted = 0;
       document
-        .querySelector(".player")
+        .querySelector(".object1")
         .addEventListener("animationend", checkWinner);
       document
-        .querySelector(".enemy")
+        .querySelector(".object2")
         .addEventListener("animationend", checkWinner);
 
       function checkWinner() {
@@ -148,6 +219,68 @@
           document.getElementById("message").textContent = "{{ winner }}";
         }
       }
+
+      // 開始点と終了点の座標
+      let startX, startY, endX, endY;
+      // 入力線分の長さと速度の比
+      const px2velRatio = 0.1;
+      // ドラッグが開始されたときの処理
+      function handleDragStart(event) {
+        if(event.button !== 0) { //左クリックのみ取得
+            return;
+        }
+        startX = event.clientX;
+        startY = event.clientY;
+      }
+
+      // ドラッグ中の処理
+      function handleDragging(event) {
+        if (!startX) {
+          return;
+        }
+        endX = event.clientX;
+        endY = event.clientY;
+        // 速度ベクトルを描画
+        const screen = document.querySelector("#screen");
+        const offsetX = screen.offsetLeft;
+        const offsetY = screen.offsetTop;
+        let diffX = endX - startX;
+        let diffY = endY - startY;
+        let p1 = startX - offsetX + "," + (startY - offsetY);
+        let p2 =
+          endX - offsetX - diffY / 4 + "," + (endY - offsetY + diffX / 4);
+        let p3 =
+          endX - offsetX + diffY / 4 + "," + (endY - offsetY - diffX / 4);
+
+        document
+          .getElementById("velocityArrow")
+          .setAttribute("points", p1 + " " + p2 + " " + p3);
+      }
+
+      // ドラッグが終了したときの処理
+      function handleDragEnd(event) {
+        if (!startX) {
+          return;
+        }
+        endX = event.clientX;
+        endY = event.clientY;
+
+        // 開始点と終了点の座標を使用して速度を計算
+        document.getElementById("vel1_x").value = px2velRatio * (startX - endX);
+        document.getElementById("vel1_y").value = px2velRatio * (startY - endY);
+
+        // 値を送信
+        document
+          .querySelector(".simulation-container")
+          .classList.add("animate");
+        document.getElementById("simulation-form").submit();
+      }
+
+      const screen = document.getElementById("screen");
+
+      screen.addEventListener("mousedown", handleDragStart);
+      document.addEventListener("mousemove", handleDragging);
+      document.addEventListener("mouseup", handleDragEnd);
     </script>
   </body>
 </html>
