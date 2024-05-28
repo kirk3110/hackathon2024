@@ -42,12 +42,11 @@ def home():
 
         # シミュレーションの実行
         positions1, positions2, stop_time1, stop_time2, collision_points = run_simulation(
-            object1.mass, object2.mass,
+            object1, object2,
             np.array([initial_conditions["pos1_x"], initial_conditions["pos1_y"]]),
             np.array([initial_conditions["pos2_x"], initial_conditions["pos2_y"]]),
             np.array([initial_conditions["vel1_x"], initial_conditions["vel1_y"]]),
             np.array([initial_conditions["vel2_x"], initial_conditions["vel2_y"]]),
-            object1.radius, object2.radius,
             initial_conditions["simulation_time"], initial_conditions["time_step"],
             initial_conditions["decay"])
 
@@ -82,19 +81,19 @@ def home():
                                collision_points=collision_points,
                                duration=duration,
                                scale=scale,
+                               object1=object1.map(),
+                               object2=object2.map(),
                                diameter1=object1.radius*2*scale,
                                diameter2=object2.radius*2*scale,
                                winner=winner,
-                               object1_mass=object1.mass,
-                               object2_mass=object2.mass,
                                initial_conditions=initial_conditions)
 
     return render_template('simulation.html',
                            show_simulation=show_simulation,
                            diameter1=object1.radius*2*scale,
                            diameter2=object2.radius*2*scale,
-                           object1_mass=object1.mass,
-                           object2_mass=object2.mass,
+                           object1=object1.map(),
+                           object2=object2.map(),
                            initial_conditions=initial_conditions)
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simulation_time, time_step, decay):
+def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, time_step, decay):
     # シミュレーションの実行
     times = np.arange(0, simulation_time, time_step)
     positions1 = []
@@ -9,6 +9,10 @@ def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simul
     stop_time1 = None
     stop_time2 = None
     collision_points = []
+    mass1 = object1.mass
+    mass2 = object2.mass
+    radius1 = object1.radius
+    radius2 = object2.radius
 
     for t in times:
         positions1.append(pos1.copy())
@@ -63,12 +67,3 @@ def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simul
             collision_points.append((t, (pos1 + pos2) /2))
 
     return positions1, positions2, stop_time1, stop_time2, collision_points
-
-
-def calculate_velocity(angle, speed):
-    # 角度をラジアンに変換
-    angle_rad = np.radians(angle)
-    # 速度ベクトルを計算
-    vx = speed * np.cos(angle_rad)
-    vy = speed * np.sin(angle_rad)
-    return np.array([vx, vy])
