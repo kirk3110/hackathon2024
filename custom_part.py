@@ -1,38 +1,33 @@
-from object import Object
-
-
 class CustomPart:
     def __init__(self, title, text, **kwargs):
         self.title = title
         self.text = text
+        self.update_methods = {
+            'mass_value': self.update_mass,
+            'radius_value': self.update_radius,
+            'improve_decay_value': self.update_decay,
+            'restitution_value': self.update_restitution
+        }
 
-        if 'mass_value' in kwargs and 'mass_calculation' in kwargs:
-            self.mass_value = kwargs.get('mass_value')
-            self.mass_calculation = kwargs.get('mass_calculation')
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
-        if 'radius_value' in kwargs and 'radius_calculation' in kwargs:
-            self.radius_value = kwargs.get('radius_value')
-            self.radius_calculation = kwargs.get('radius_calculation')
+    def update_mass(self, object_):
+        if self.mass_calculation == 'multiple':
+            object_.mass *= self.mass_value
 
-        if 'improve_decay_value' in kwargs:
-            self.improve_decay_value = kwargs.get('improve_decay_value')
+    def update_radius(self, object_):
+        if self.radius_calculation == 'multiple':
+            object_.radius *= self.radius_value
 
-    def update(self, object):
-        update_object = Object(object.mass, object.radius, object.decay, object.restitution)
+    def update_decay(self, object_):
+        object_.decay = 1 - (1 - object_.decay) * (1 - self.improve_decay_value)
 
-        if hasattr(self, 'mass_value') and hasattr(self, 'mass_calculation'):
-            if self.mass_calculation == 'multiple':
-                update_object.mass *= self.mass_value
+    def update_restitution(self, object_):
+        if self.restitution_calculation == 'add':
+            object_.restitution += self.restitution_value
 
-        if hasattr(self, 'radius_value') and hasattr(self, 'radius_calculation'):
-            if self.radius_calculation == 'multiple':
-                update_object.radius *= self.radius_value
-
-        if hasattr(self, 'improve_decay_value'):
-            update_object.decay = 1 - (1 - object.decay) * (1 - self.improve_decay_value)
-
-        if hasattr(self, 'restitution_value') and hasattr(self, 'restitution_calculation'):
-            if self.restitution_calculation == 'add':
-                update_object.restitution += self.restitution_value
-
-        return update_object
+    def update(self, object_):
+        for attribute, update_method in self.update_methods.items():
+            if hasattr(self, attribute):
+                update_method(object_)

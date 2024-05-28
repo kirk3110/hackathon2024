@@ -149,7 +149,7 @@ def reward():
     if request.method == 'POST':
         data = request.get_json()
         selected_part = custom_parts[int(data['id'])]
-        object1 = selected_part.update(object1)
+        selected_part.update(object1)
         session['object1'] = object1.map()
 
         # シミュレーション画面にリダイレクト
