@@ -46,7 +46,6 @@ def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simul
         if pos2 [1] + radius2 >= 10: #y=10地点の衝突
             vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
 
-        #ベクトルを用いた重力にするために上記コメントアウト
         k = 9.81*math.sin(math.radians(10))  #重力加速度(平面方向)
         pos0 = np.array([5.0, 5.0]) #原点座標
         acc1 = k * (pos0 - pos1)  #原点方向の加速度
