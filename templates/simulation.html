@@ -32,18 +32,17 @@
           width: 100%;
           height: 100%;
           border: dashed;
-          border-width: 5px;
+          border-width: 8px;
           border-radius: 50%;
-          border-color: rgba(255, 255, 255, 0.9);
-          animation:1s linear infinite rotation1;
+          border-color: rgba(255, 255, 255, 0.7);
+          animation:0.8s linear infinite rotation1;
         }
         @keyframes rotation1{
           0%{ transform:rotate(0); }
           100%{ transform:rotate(360deg); }
         }
        .object-inner.lose{
-          animation:10s linear infinite rotation1;
-          border-color: rgba(0, 0, 0, 0.9);
+          animation:30s linear infinite rotation1;
           background-color: rgba(0, 0, 0, 0.5);
        }
        .object1 {
@@ -82,21 +81,23 @@
           position: absolute;
           width: 1px;
           height: 1px;
-          background: rgba(255, 0, 255, 1);
-          top: {{ collision_point[1][1] * scale + (enemy_diameter + player_diameter) / 4 }}px;
-          left: {{ collision_point[1][0] * scale + (enemy_diameter + player_diameter) / 4  }}px;
-          animation: spark 1s forwards;
+          background: rgba(255, 255, 0, 0.0);
+          top: {{ collision_point[1][1] * scale + (diameter1 + diameter2) / 2 / 2 }}px;
+          left: {{ collision_point[1][0] * scale + (diameter1 + diameter2) / 2 / 2  }}px;
+          animation: spark 1s;
+          animation-fill-mode: forwards;
           animation-delay: {{ collision_point[0] }}s;
+          animation-direction: normal;
         }
       {% endfor %}
       @keyframes spark {
         0% {
           transform:scale(0);
-          opacity: 0.7;
+          background: rgba(255, 0, 255, 0.8);
         }
-        99.9% {
+        100% {
           transform:scale(1000);
-          opacity: 0;
+          background: rgba(255, 255, 125, 0.0);
         }
       }  </style>
   </head>
