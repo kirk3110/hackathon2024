@@ -245,6 +245,7 @@
         </div>
       </form>
       <a href="/reward" class="btn btn-primary m-2" id="rewardButton">Get a Reward</a>
+      <a href="/restart" class="btn btn-secondary m-2" id="restartButton">Restart</a>
     </div>
     <script>
       document
@@ -277,7 +278,9 @@
 
       document.querySelector(".object1").addEventListener("animationend", function() {
         if ("{{ winner }}" === "Object 1 Win!") {
-          document.getElementById("rewardButton").style.display = "block";
+          document.getElementById("rewardButton").style.display = "inline-block";
+        } else {
+          document.getElementById("restartButton").style.display = "inline-block";
         }
       });
 

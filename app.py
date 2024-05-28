@@ -156,11 +156,10 @@ def reward():
         return redirect(url_for('home'))
 
 
-@app.before_request
+@app.route('/restart')
 def clear_session():
-    # 遷移元も遷移先も/のときはセッションをクリア
-    if request.path == '/' and request.referrer == request.url_root:
-        session.clear()
+    session.clear()
+    return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
