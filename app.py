@@ -31,12 +31,15 @@ def home():
         "time_step": 0.1,
         "decay": 0.99
     }
+    default_object = Object(1.5, 0.5, 0.98, 1.0, 15.0)
     if 'object1' in session:
-        object1 = Object(**session['object1'])
+        try:
+            object1 = Object(**session['object1'])
+        except TypeError:
+            object1 = default_object
     else:
-        object1 = Object(1.0, 0.5, 0.98, 1.0)
-        session['object1'] = object1.map()
-    object2 = Object(1.0, 0.5, 0.98, 1.0)
+        object1 = default_object
+    object2 = Object(1.0, 0.5, 0.98, 1.0, 10.0)
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
 

@@ -15,6 +15,10 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
     radius2 = object2.radius
     restitution1 = object1.restitution
     restitution2 = object2.restitution
+    decay1 = object1.decay
+    decay2 = object2.decay
+    rps1 = object1.rps
+    rps2 = object2.rps
 
     for t in times:
         positions1.append(pos1.copy())
@@ -23,17 +27,8 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
         pos1 += vel1 * time_step  # 位置の更新
         pos2 += vel2 * time_step
 
-        vel1 = vel1 * decay * object1.decay  # 摩擦力を速度減衰で再現 共通係数 * 個別係数
-        vel2 = vel2 * decay * object2.decay
-
-        if stop_time1 is None and np.linalg.norm(vel1) <= 0.3:  # いつまでも微的な動きが続かないように停止判定
-            stop_time1 = t
-            vel1 = np.array([0, 0])
-        if stop_time2 is None and np.linalg.norm(vel2) <= 0.3:
-            stop_time2 = t
-            vel2 = np.array([0, 0])
-        if stop_time1 and stop_time2:
-            break
+        vel1 = vel1 * decay * decay1  # 摩擦力を速度減衰で再現 共通係数 * 個別係数
+        vel2 = vel2 * decay * decay2
 
         for wall in walls:
             if wall.detect_collision(radius1, pos1):
@@ -54,5 +49,22 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
             vel1 = v1 - 2 * mass2 / (mass1 + mass2) * np.dot(v1 - v2, pos1 - pos2) / np.linalg.norm(pos1 - pos2)**2 * (pos1 - pos2)
             vel2 = v2 - 2 * mass1 / (mass1 + mass2) * np.dot(v2 - v1, pos2 - pos1) / np.linalg.norm(pos2 - pos1)**2 * (pos2 - pos1)
             collision_points.append((t, (pos1 * radius2 + pos2 * radius1) / (radius1 + radius2)))
+
+            # 衝突時に互いのrpsを減衰させる
+            # decayが小さいほど減衰率が低くなる
+            # radiusに対するmassが重いほど減衰率が低くなる
+            rps1 = rps1 * (1 - decay1 * radius1 / mass1)
+            rps2 = rps2 * (1 - decay2 * radius2 / mass2)
+
+            restitution1 = restitution1 * (rps1 / object1.rps)
+            restitution2 = restitution2 * (rps2 / object2.rps)
+
+            # 先にrpsが0になった方が負け
+            if rps1 <= 0.03 and stop_time1 is None:
+                stop_time1 = t
+            if rps2 <= 0.03 and stop_time2 is None:
+                stop_time2 = t
+            if stop_time1 is not None and stop_time2 is not None:
+                break
 
     return positions1, positions2, stop_time1, stop_time2, collision_points
