@@ -60,9 +60,9 @@ def home():
         if stop_time1 is None and stop_time2 is None or stop_time1 == stop_time2:
             winner = None
         elif stop_time1 is not None and (stop_time2 is None or stop_time1 < stop_time2):
-            winner = 1
-        elif stop_time2 is not None and (stop_time1 is None or stop_time2 < stop_time1):
             winner = 2
+        elif stop_time2 is not None and (stop_time1 is None or stop_time2 < stop_time1):
+            winner = 1
 
         # アニメーションのキーフレームを生成
         def generate_keyframes(positions, duration, scale):
