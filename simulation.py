@@ -66,6 +66,6 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
             v1, v2 = vel1.copy(), vel2.copy()
             vel1 = v1 - 2 * mass2 / (mass1 + mass2) * np.dot(v1 - v2, pos1 - pos2) / np.linalg.norm(pos1 - pos2)**2 * (pos1 - pos2)
             vel2 = v2 - 2 * mass1 / (mass1 + mass2) * np.dot(v2 - v1, pos2 - pos1) / np.linalg.norm(pos2 - pos1)**2 * (pos2 - pos1)
-            collision_points.append((t, (pos1 + pos2) /2))
+            collision_points.append((t, (pos1 * radius2 + pos2 * radius1) / (radius1 + radius2)))
 
     return positions1, positions2, stop_time1, stop_time2, collision_points
