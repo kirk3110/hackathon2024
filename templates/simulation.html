@@ -271,7 +271,7 @@
       function checkWinner() {
         animationsCompleted += 1;
         if (animationsCompleted === 2) {
-          {% if winner is defined and winner == None %}
+          {% if winner is defined and winner != None %}
             document.getElementById("message").textContent = "Object" + {{ winner }} + " win!";
           {% else %}
             document.getElementById("message").textContent = "Draw";
