@@ -49,11 +49,11 @@ def home():
             initial_conditions["decay"])
 
         if stop_time1 is None and stop_time2 is None or stop_time1 == stop_time2:
-            winner = "Draw"
+            winner = None
         elif stop_time1 is not None and (stop_time2 is None or stop_time1 < stop_time2):
-            winner = "Object 2 Win!"
+            winner = 1
         elif stop_time2 is not None and (stop_time1 is None or stop_time2 < stop_time1):
-            winner = "Object 1 Win!"
+            winner = 2
 
         # アニメーションのキーフレームを生成
         def generate_keyframes(positions, duration, scale):
@@ -82,6 +82,7 @@ def home():
                                diameter1=initial_conditions["radius1"]*2*scale,
                                diameter2=initial_conditions["radius1"]*2*scale,
                                winner=winner,
+                               loser_stop_time = min(stop_time1, stop_time2),
                                initial_conditions=initial_conditions)
 
     return render_template('simulation.html',

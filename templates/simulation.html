@@ -35,15 +35,17 @@
           border-width: 8px;
           border-radius: 50%;
           border-color: rgba(255, 255, 255, 0.7);
-          animation:0.8s linear infinite rotation1;
+          animation:0.8s linear infinite rotation;
         }
-        @keyframes rotation1{
+        @keyframes rotation{
           0%{ transform:rotate(0); }
           100%{ transform:rotate(360deg); }
         }
-       .object-inner.lose{
-          animation:30s linear infinite rotation1;
-          background-color: rgba(0, 0, 0, 0.5);
+        @keyframes darken{
+          100%{ background-color: black; }
+        }
+       .object-inner.loser{
+          animation:0.8s linear infinite rotation, 5s linear infinite rotation {{ loser_stop_time }}s, 0.1s darken forwards {{ loser_stop_time }}s;
        }
        .object1 {
          background-color: red;
@@ -203,11 +205,11 @@
               <svg id="drawingArea"width="600" height="600">
                 <polygon id="velocityArrow" points="0,0 0,0 0,0" />
               </svg>
-              <div class="object1">
+              <div class="object{{ winner }}">
                 <div class="object-inner"></div>
               </div>
-              <div class="object2">
-                <div class="object-inner"></div>
+              <div class="object{{ 1 if winner == 2 else 2 }}">
+                <div class="object-inner loser"></div>
               </div>
               <div id="message" class="message row"></div>
               {% for collision_point in collision_points %}
@@ -239,11 +241,12 @@
 
       function checkWinner() {
         animationsCompleted += 1;
-        if (animationsCompleted === 1) {
-          this.querySelector(".object-inner").classList.add("lose")
-        }
         if (animationsCompleted === 2) {
-          document.getElementById("message").textContent = "{{ winner }}";
+          {% if winner == None %}
+            document.getElementById("message").textContent = "Draw";
+          {% else %}
+            document.getElementById("message").textContent = "Object" + {{ winner }} + " win!";
+          {% endif %}
         }
       }
 
