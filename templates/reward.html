@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <style>
+    html,body {
+      height: 100%;
+    }
+    .container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Prise</h1>
+  <p>Choose one of the three custom parts.</p>
+  <div class="row">
+    <div class="col-4">
+      <div class="card reward" id="reward_1">
+        <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+        <div class="card-body">
+          <input type="hidden" id="reward_1_id" value="{{ reward_1_id }}">
+          <h5 class="card-title">{{ reward_1_title }}</h5>
+          <p class="card-text">{{ reward_1_text }}</p>
+          <a href="/" class="btn btn-primary">Select</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card reward" id="reward_2">
+        <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+        <div class="card-body">
+          <input type="hidden" id="reward_2_id" value="{{ reward_2_id }}">
+          <h5 class="card-title">{{ reward_2_title }}</h5>
+          <p class="card-text">{{ reward_2_text }}</p>
+          <a href="/" class="btn btn-primary">Select</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card reward" id="reward_3">
+        <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
+        <div class="card-body">
+          <input type="hidden" id="reward_3_id" value="{{ reward_3_id }}">
+          <h5 class="card-title">{{ reward_3_title }}</h5>
+          <p class="card-text">{{ reward_3_text }}</p>
+          <a href="/" class="btn btn-primary">Select</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const rewards = document.querySelectorAll('.reward');
+  rewards.forEach(reward => {
+    reward.addEventListener('click', (event) => {
+      event.preventDefault();  // デフォルトのリンククリック動作をキャンセル
+      const rewardId = reward.querySelector('input').value;
+      fetch(`/reward`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: rewardId
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          // レスポンスがOKの場合、ルートページにリダイレクト
+          window.location.href = '/';
+        } else {
+          console.error('Error:', response.statusText);
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
