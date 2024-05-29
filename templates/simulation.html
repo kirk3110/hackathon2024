@@ -232,12 +232,12 @@
               <svg id="drawingArea"width="600" height="600">
                 <polygon id="velocityArrow" points="0,0 0,0 0,0" />
               </svg>
-              <div class="object{{ winner }}">
-                <div class="object-inner"></div>
-              </div>
-              <div class="object{{ 1 if winner == 2 else 2 }}">
-                <div class="object-inner loser"></div>
-              </div>
+                <div class="object1">
+                  <div class="object-inner{{ ' loser' if winner == 2 }}"></div>
+                </div>
+                <div class="object2">
+                  <div class="object-inner{{ ' loser' if winner == 1 }}"></div>
+                </div>
               <div id="message" class="message row"></div>
               {% for collision_point in collision_points %}
                 <div class="spark{{ loop.index }}"></div>
@@ -271,20 +271,18 @@
       function checkWinner() {
         animationsCompleted += 1;
         if (animationsCompleted === 2) {
-          {% if winner == None %}
-            document.getElementById("message").textContent = "Draw";
-          {% else %}
+          {% if winner is defined and winner == None %}
             document.getElementById("message").textContent = "Object" + {{ winner }} + " win!";
+          {% else %}
+            document.getElementById("message").textContent = "Draw";
           {% endif %}
         }
       }
 
       document.querySelector(".object1").addEventListener("animationend", function() {
-        if ("{{ winner }}" === "Object 1 Win!") {
-          document.getElementById("rewardButton").style.display = "inline-block";
-        } else {
-          document.getElementById("restartButton").style.display = "inline-block";
-        }
+          document.getElementById(
+            "{{ "rewardButton" if winner == 1 else "restartButton" }}"
+          ).style.display = "inline-block";
       });
 
       // 開始点と終了点の座標
