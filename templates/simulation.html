@@ -289,6 +289,12 @@
       let startX, startY, endX, endY;
       // 入力線分の長さと速度の比
       const px2velRatio = 0.1;
+
+      // オフセット
+      const screen = document.querySelector("#screen");
+      const offsetX = screen.offsetLeft;
+      const offsetY = screen.offsetTop;
+
       // ドラッグが開始されたときの処理
       function handleDragStart(event) {
         if(event.button !== 0) { //左クリックのみ取得
@@ -306,9 +312,6 @@
         endX = event.clientX;
         endY = event.clientY;
         // 速度ベクトルを描画
-        const screen = document.querySelector("#screen");
-        const offsetX = screen.offsetLeft;
-        const offsetY = screen.offsetTop;
         let diffX = endX - startX;
         let diffY = endY - startY;
         let p1 = startX - offsetX + "," + (startY - offsetY);
@@ -330,6 +333,10 @@
         endX = event.clientX;
         endY = event.clientY;
 
+        //開始点の座標をセット
+        document.getElementById("pos1_x").value = (startX - offsetX) / {{ scale }};
+        document.getElementById("pos1_y").value = (startY - offsetY) / {{ scale }};
+
         // 開始点と終了点の座標を使用して速度を計算
         document.getElementById("vel1_x").value = px2velRatio * (startX - endX);
         document.getElementById("vel1_y").value = px2velRatio * (startY - endY);
@@ -340,8 +347,6 @@
           .classList.add("animate");
         document.getElementById("simulation-form").submit();
       }
-
-      const screen = document.getElementById("screen");
 
       screen.addEventListener("mousedown", handleDragStart);
       document.addEventListener("mousemove", handleDragging);

@@ -100,6 +100,7 @@ def home():
                            show_simulation=show_simulation,
                            diameter1=object1.radius*2*scale,
                            diameter2=object2.radius*2*scale,
+                           scale=scale,
                            object1=object1.map(),
                            object2=object2.map(),
                            initial_conditions=initial_conditions)
