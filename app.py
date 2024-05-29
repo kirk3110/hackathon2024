@@ -39,6 +39,7 @@ def home():
             object1 = default_object
     else:
         object1 = default_object
+    session['object1'] = object1.map()
     object2 = Object(1.0, 0.5, 0.98, 1.0, 10.0)
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
