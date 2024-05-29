@@ -68,6 +68,9 @@
             width: 100%
             height: 100%
         }
+        .wall {
+          fill: rgba(255, 128, 255, 1.0)
+        }
         #velocityArrow {
             fill: lime;
         }
@@ -231,13 +234,20 @@
             <div id="screen" class="simulation-container m-2">
               <svg id="drawingArea"width="600" height="600">
                 <polygon id="velocityArrow" points="0,0 0,0 0,0" />
+                {% for wall in walls %}
+                  <polygon class="wall" points="
+                    {{ (wall.position[0] + wall.normal_vector[0]) * scale }},{{ (wall.position[1] + wall.normal_vector[1]) * scale }}
+                    {{ (wall.position[0] + wall.normal_vector[1] * 5) * scale }},{{ (wall.position[1] + wall.normal_vector[0] * 5) * scale }}
+                    {{ (wall.position[0] - wall.normal_vector[1] * 5) * scale }},{{ (wall.position[1] - wall.normal_vector[0] * 5) * scale }}
+                  " />
+                {% endfor %}
               </svg>
-                <div class="object1">
-                  <div class="object-inner{{ ' loser' if winner == 2 }}"></div>
-                </div>
-                <div class="object2">
-                  <div class="object-inner{{ ' loser' if winner == 1 }}"></div>
-                </div>
+              <div class="object1">
+                <div class="object-inner{{ ' loser' if winner == 2 }}"></div>
+              </div>
+              <div class="object2">
+                <div class="object-inner{{ ' loser' if winner == 1 }}"></div>
+              </div>
               <div id="message" class="message row"></div>
               {% for collision_point in collision_points %}
                 <div class="spark{{ loop.index }}"></div>

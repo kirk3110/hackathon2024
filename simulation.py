@@ -1,8 +1,7 @@
 import numpy as np
 import math
-from object import Wall
 
-def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, time_step, decay):
+def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, time_step, decay, walls):
     # シミュレーションの実行
     times = np.arange(0, simulation_time, time_step)
     positions1 = []
@@ -16,12 +15,6 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
     radius2 = object2.radius
     restitution1 = object1.restitution
     restitution2 = object2.restitution
-
-    walls = []
-    walls.append(Wall(np.array([0, 0]), np.array([0, 1])))
-    walls.append(Wall(np.array([0, 0]), np.array([1, 0])))
-    walls.append(Wall(np.array([10, 10]), np.array([0, -1])))
-    walls.append(Wall(np.array([10, 10]), np.array([-1, 0])))
 
     for t in times:
         positions1.append(pos1.copy())
