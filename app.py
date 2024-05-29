@@ -93,7 +93,7 @@ def home():
                                diameter1=object1.radius*2*scale,
                                diameter2=object2.radius*2*scale,
                                winner=winner,
-                               loser_stop_time = min(stop_time1, stop_time2),
+                               loser_stop_time = min(stop_time1 or duration, stop_time2 or duration),
                                initial_conditions=initial_conditions)
 
     return render_template('simulation.html',
