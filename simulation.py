@@ -68,6 +68,9 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
             rps1 = rps1 * (1 - decay1 * radius1 / mass1)
             rps2 = rps2 * (1 - decay2 * radius2 / mass2)
 
+            restitution1 = restitution1 * (rps1 / object1.rps)
+            restitution2 = restitution2 * (rps2 / object2.rps)
+
             # 先にrpsが0になった方が負け
             if rps1 <= 0.03 and stop_time1 is None:
                 stop_time1 = t
