@@ -24,16 +24,37 @@
 
        .object1, .object2 {
          position: absolute;
-         width: {{ diameter1 }}px;
-         height: {{ diameter2 }}px;
          border-radius: 50%;
+       }
+       .object-inner {
+          width: 100%;
+          height: 100%;
+          border: dashed;
+          border-width: 8px;
+          border-radius: 50%;
+          border-color: rgba(255, 255, 255, 0.7);
+          animation:0.8s linear infinite rotation;
+        }
+        @keyframes rotation{
+          0%{ transform:rotate(0); }
+          100%{ transform:rotate(360deg); }
+        }
+        @keyframes darken{
+          100%{ background-color: black; }
+        }
+       .object-inner.loser{
+          animation:0.8s linear infinite rotation, 5s linear infinite rotation {{ loser_stop_time }}s, 0.1s darken forwards {{ loser_stop_time }}s;
        }
        .object1 {
          background-color: red;
+         width: {{ diameter1 }}px;
+         height: {{ diameter1 }}px;
          animation: move1 {{ duration }}s linear forwards;
        }
        .object2 {
          background-color: blue;
+         width: {{ diameter2 }}px;
+         height: {{ diameter2 }}px;
          animation: move2 {{ duration }}s linear forwards;
        }
        @keyframes move1 {
@@ -50,6 +71,9 @@
         #velocityArrow {
             fill: lime;
         }
+        #rewardButton {
+          display: none;
+        }
 
       .message {
          position: absolute;
@@ -57,7 +81,32 @@
          left: 230px;
          font-size: 24px;
       }
-    </style>
+      {% for collision_point in collision_points %}
+        {# collision_point: (time, pos) #}
+        .spark{{ loop.index }} {
+          border-radius: 50%;
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          background: rgba(255, 255, 0, 0.0);
+          top: {{ collision_point[1][1] * scale + (diameter1 + diameter2) / 2 / 2 }}px;
+          left: {{ collision_point[1][0] * scale + (diameter1 + diameter2) / 2 / 2  }}px;
+          animation: spark 1s;
+          animation-fill-mode: forwards;
+          animation-delay: {{ collision_point[0] }}s;
+          animation-direction: normal;
+        }
+      {% endfor %}
+      @keyframes spark {
+        0% {
+          transform:scale(0);
+          background: rgba(255, 0, 255, 0.8);
+        }
+        100% {
+          transform:scale(1000);
+          background: rgba(255, 255, 125, 0.0);
+        }
+      }  </style>
   </head>
   <body>
     <div class="container">
@@ -71,8 +120,8 @@
               id="mass1"
               name="mass1"
               step="0.1"
-              value="{{ initial_conditions['mass1'] }}"
-              required
+              value="{{ object1['mass'] }}"
+              disabled
             />
 
             <label for="mass2">Mass 2:</label>
@@ -82,8 +131,30 @@
               id="mass2"
               name="mass2"
               step="0.1"
-              value="{{ initial_conditions['mass2'] }}"
-              required
+              value="{{ object2['mass'] }}"
+              disabled
+            />
+
+            <label for="diameter1">Diameter 1:</label>
+            <input
+                class="form-control form-control-sm"
+                type="number"
+                id="diameter1"
+                name="diameter1"
+                step="0.1"
+                value="{{ diameter1 }}"
+                disabled
+            />
+
+            <label for="diameter2">Diameter 2:</label>
+            <input
+                class="form-control form-control-sm"
+                type="number"
+                id="diameter2"
+                name="diameter2"
+                step="0.1"
+                value="{{ diameter2 }}"
+                disabled
             />
 
             <label for="pos1_x">Position 1 X:</label>
@@ -161,13 +232,22 @@
               <svg id="drawingArea"width="600" height="600">
                 <polygon id="velocityArrow" points="0,0 0,0 0,0" />
               </svg>
-              <div class="object1"></div>
-              <div class="object2"></div>
+                <div class="object1">
+                  <div class="object-inner{{ ' loser' if winner == 2 }}"></div>
+                </div>
+                <div class="object2">
+                  <div class="object-inner{{ ' loser' if winner == 1 }}"></div>
+                </div>
               <div id="message" class="message row"></div>
+              {% for collision_point in collision_points %}
+                <div class="spark{{ loop.index }}"></div>
+              {% endfor %}
             </div>
           </div>
         </div>
       </form>
+      <a href="/reward" class="btn btn-primary m-2" id="rewardButton">Get a Reward</a>
+      <a href="/restart" class="btn btn-secondary m-2" id="restartButton">Restart</a>
     </div>
     <script>
       document
@@ -191,14 +271,30 @@
       function checkWinner() {
         animationsCompleted += 1;
         if (animationsCompleted === 2) {
-          document.getElementById("message").textContent = "{{ winner }}";
+          {% if winner is defined and winner != None %}
+            document.getElementById("message").textContent = "Object" + {{ winner }} + " win!";
+          {% else %}
+            document.getElementById("message").textContent = "Draw";
+          {% endif %}
         }
       }
+
+      document.querySelector(".object1").addEventListener("animationend", function() {
+          document.getElementById(
+            "{{ "rewardButton" if winner == 1 else "restartButton" }}"
+          ).style.display = "inline-block";
+      });
 
       // 開始点と終了点の座標
       let startX, startY, endX, endY;
       // 入力線分の長さと速度の比
       const px2velRatio = 0.1;
+
+      // オフセット
+      const screen = document.querySelector("#screen");
+      const offsetX = screen.offsetLeft;
+      const offsetY = screen.offsetTop;
+
       // ドラッグが開始されたときの処理
       function handleDragStart(event) {
         if(event.button !== 0) { //左クリックのみ取得
@@ -216,9 +312,6 @@
         endX = event.clientX;
         endY = event.clientY;
         // 速度ベクトルを描画
-        const screen = document.querySelector("#screen");
-        const offsetX = screen.offsetLeft;
-        const offsetY = screen.offsetTop;
         let diffX = endX - startX;
         let diffY = endY - startY;
         let p1 = startX - offsetX + "," + (startY - offsetY);
@@ -240,6 +333,10 @@
         endX = event.clientX;
         endY = event.clientY;
 
+        //開始点の座標をセット
+        document.getElementById("pos1_x").value = (startX - offsetX) / {{ scale }};
+        document.getElementById("pos1_y").value = (startY - offsetY) / {{ scale }};
+
         // 開始点と終了点の座標を使用して速度を計算
         document.getElementById("vel1_x").value = px2velRatio * (startX - endX);
         document.getElementById("vel1_y").value = px2velRatio * (startY - endY);
@@ -250,8 +347,6 @@
           .classList.add("animate");
         document.getElementById("simulation-form").submit();
       }
-
-      const screen = document.getElementById("screen");
 
       screen.addEventListener("mousedown", handleDragStart);
       document.addEventListener("mousemove", handleDragging);

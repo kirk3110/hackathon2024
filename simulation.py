@@ -1,13 +1,20 @@
 import numpy as np
 import math
 
-def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simulation_time, time_step, decay):
+def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, time_step, decay):
     # シミュレーションの実行
     times = np.arange(0, simulation_time, time_step)
     positions1 = []
     positions2 = []
     stop_time1 = None
     stop_time2 = None
+    collision_points = []
+    mass1 = object1.mass
+    mass2 = object2.mass
+    radius1 = object1.radius
+    radius2 = object2.radius
+    restitution1 = object1.restitution
+    restitution2 = object2.restitution
 
     for t in times:
         positions1.append(pos1.copy())
@@ -16,8 +23,8 @@ def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simul
         pos1 += vel1 * time_step  # 位置の更新
         pos2 += vel2 * time_step
 
-        vel1 = vel1 * decay  # 摩擦力を速度減衰で再現
-        vel2 = vel2 * decay
+        vel1 = vel1 * decay * object1.decay  # 摩擦力を速度減衰で再現 共通係数 * 個別係数
+        vel2 = vel2 * decay * object2.decay
 
         if stop_time1 is None and np.linalg.norm(vel1) <= 0.3:  # いつまでも微的な動きが続かないように停止判定
             stop_time1 = t
@@ -29,22 +36,22 @@ def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simul
             break
 
         if pos1 [0] + radius1 <= 0: #x=0地点の衝突 1についての壁の反発　壁は上下左右に10の幅であるとしています
-            vel1[0] = vel1[0] *-1 * 1 #この1は反発係数
+            vel1[0] = vel1[0] *-1 * restitution1 #この1は反発係数
         if pos1 [0] + radius1 >= 10: #x=10地点の衝突
-            vel1[0] = vel1[0] *-1 * 1 #この1は反発係数
+            vel1[0] = vel1[0] *-1 * restitution1 #この1は反発係数
         if pos1 [1] + radius1 <= 0: #y=0地点の衝突
-            vel1[1] = vel1[1] *-1 * 1 #この1は反発係数
+            vel1[1] = vel1[1] *-1 * restitution1 #この1は反発係数
         if pos1 [1] + radius1 >= 10: #y=10地点の衝突
-            vel1[1] = vel1[1] *-1 * 1 #この1は反発係数
+            vel1[1] = vel1[1] *-1 * restitution1 #この1は反発係数
 
         if pos2 [0] + radius2 <= 0: #x=0地点の衝突　2についての壁の反発
-            vel2[0] = vel2[0] *-1 * 1 #この1は反発係数
+            vel2[0] = vel2[0] *-1 * restitution2 #この1は反発係数
         if pos2 [0] + radius2 >= 10: #x=10地点の衝突
-            vel2[0] = vel2[0] *-1 * 1 #この1は反発係数
+            vel2[0] = vel2[0] *-1 * restitution2 #この1は反発係数
         if pos2 [1] + radius2 <= 0: #y=0地点の衝突
-            vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
+            vel2[1] = vel2[1] *-1 * restitution2 #この1は反発係数
         if pos2 [1] + radius2 >= 10: #y=10地点の衝突
-            vel2[1] = vel2[1] *-1 * 1 #この1は反発係数
+            vel2[1] = vel2[1] *-1 * restitution2 #この1は反発係数
 
         k = 9.81*math.sin(math.radians(10))  #重力加速度(平面方向)
         pos0 = np.array([5.0, 5.0]) #原点座標
@@ -53,20 +60,11 @@ def run_simulation(mass1, mass2, pos1, pos2, vel1, vel2, radius1, radius2, simul
         acc2 = k * (pos0 - pos2) 
         vel2 = vel2 + acc2 * time_step
             
-
         if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
             # 完全弾性衝突の速度更新
             v1, v2 = vel1.copy(), vel2.copy()
             vel1 = v1 - 2 * mass2 / (mass1 + mass2) * np.dot(v1 - v2, pos1 - pos2) / np.linalg.norm(pos1 - pos2)**2 * (pos1 - pos2)
             vel2 = v2 - 2 * mass1 / (mass1 + mass2) * np.dot(v2 - v1, pos2 - pos1) / np.linalg.norm(pos2 - pos1)**2 * (pos2 - pos1)
+            collision_points.append((t, (pos1 + pos2) /2))
 
-    return positions1, positions2, stop_time1, stop_time2
-
-
-def calculate_velocity(angle, speed):
-    # 角度をラジアンに変換
-    angle_rad = np.radians(angle)
-    # 速度ベクトルを計算
-    vx = speed * np.cos(angle_rad)
-    vy = speed * np.sin(angle_rad)
-    return np.array([vx, vy])
+    return positions1, positions2, stop_time1, stop_time2, collision_points
