@@ -24,8 +24,6 @@
 
        .object1, .object2 {
          position: absolute;
-         width: {{ diameter1 }}px;
-         height: {{ diameter2 }}px;
          border-radius: 50%;
        }
        .object-inner {
@@ -49,10 +47,14 @@
        }
        .object1 {
          background-color: red;
+         width: {{ diameter1 }}px;
+         height: {{ diameter1 }}px;
          animation: move1 {{ duration }}s linear forwards;
        }
        .object2 {
          background-color: blue;
+         width: {{ diameter2 }}px;
+         height: {{ diameter2 }}px;
          animation: move2 {{ duration }}s linear forwards;
        }
        @keyframes move1 {
@@ -68,6 +70,9 @@
         }
         #velocityArrow {
             fill: lime;
+        }
+        #rewardButton {
+          display: none;
         }
 
       .message {
@@ -115,8 +120,8 @@
               id="mass1"
               name="mass1"
               step="0.1"
-              value="{{ initial_conditions['mass1'] }}"
-              required
+              value="{{ object1['mass'] }}"
+              disabled
             />
 
             <label for="mass2">Mass 2:</label>
@@ -126,8 +131,30 @@
               id="mass2"
               name="mass2"
               step="0.1"
-              value="{{ initial_conditions['mass2'] }}"
-              required
+              value="{{ object2['mass'] }}"
+              disabled
+            />
+
+            <label for="diameter1">Diameter 1:</label>
+            <input
+                class="form-control form-control-sm"
+                type="number"
+                id="diameter1"
+                name="diameter1"
+                step="0.1"
+                value="{{ diameter1 }}"
+                disabled
+            />
+
+            <label for="diameter2">Diameter 2:</label>
+            <input
+                class="form-control form-control-sm"
+                type="number"
+                id="diameter2"
+                name="diameter2"
+                step="0.1"
+                value="{{ diameter2 }}"
+                disabled
             />
 
             <label for="pos1_x">Position 1 X:</label>
@@ -219,6 +246,8 @@
           </div>
         </div>
       </form>
+      <a href="/reward" class="btn btn-primary m-2" id="rewardButton">Get a Reward</a>
+      <a href="/restart" class="btn btn-secondary m-2" id="restartButton">Restart</a>
     </div>
     <script>
       document
@@ -249,6 +278,14 @@
           {% endif %}
         }
       }
+
+      document.querySelector(".object1").addEventListener("animationend", function() {
+        if ("{{ winner }}" === "Object 1 Win!") {
+          document.getElementById("rewardButton").style.display = "inline-block";
+        } else {
+          document.getElementById("restartButton").style.display = "inline-block";
+        }
+      });
 
       // 開始点と終了点の座標
       let startX, startY, endX, endY;
