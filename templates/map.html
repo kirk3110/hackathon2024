@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branching Tree</title>
+
+</head>
+<body>
+<div class="container">
+  {{ map_html |safe }}
+</div>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branching Tree</title>
+  <style>
+    .tree-table {
+      border-collapse: collapse;
+    }
+    .node {
+      justify-content: center;
+      align-items: center;
+    }
+    .node .current {
+      background-color: #fff0f0;
+    }
+    .node-circle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px solid black;
+    }
+    .blank {
+      width: 50px;
+      height: 50px;
+    }
+    .tree-table td {
+      width: 50px;
+      height: 50px;
+      align-content: center;
+      text-align: center;
+      border: 1px solid white;
+    }
+    .arrow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+<table class="tree-table">
+  {% for step_i in range(map_tree.tree | length) %}
+    {% set step = map_tree.tree[step_i] %}
+    <tr>
+      {% for td_i in range(9) %}
+        {% set exist_node = [] %}
+        {% for node in step %}
+          {% if td_i == node.node_id % 10 * 2 %}
+            <td class="node">
+              <div class="node-circle {% if node.node_id == map_tree.current_node_id %}current{% endif %}">
+                {{ node.node_id }}
+              </div>
+            </td>
+            {% set _ = exist_node.append(True) %}
+          {% endif %}
+        {% endfor %}
+        {% if True not in exist_node %}
+          <td class="node"><div class="blank"></div></td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for td_i in range(9) %}
+        {% set exist_arrow = [] %}
+        {% for node in step %}
+          {% if td_i + 1 == node.node_id % 10 * 2 %}
+            {% if "left" in node.arrows_to_next %}
+              <td><div class="arrow">↙</div></td>
+              {% set _ = exist_arrow.append(True) %}
+            {% endif %}
+          {% elif td_i == node.node_id % 10 * 2 %}
+            {% if "straight" in node.arrows_to_next %}
+              <td><div class="arrow">↓</div></td>
+              {% set _ = exist_arrow.append(True) %}
+            {% endif %}
+          {% elif td_i - 1 == node.node_id % 10 * 2 %}
+            {% if "right" in node.arrows_to_next %}
+              <td><div class="arrow">↘</div></td>
+              {% set _ = exist_arrow.append(True) %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if True not in exist_arrow %}
+          <td></td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+</table>
+</div>
+</body>
+</html>

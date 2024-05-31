@@ -16,6 +16,7 @@ class Object:
             "rps": self.rps
         }
 
+
 class Wall:
     def __init__(self, position, normal_vector):
         self.position = position
