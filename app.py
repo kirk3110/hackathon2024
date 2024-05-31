@@ -58,7 +58,7 @@ def home():
                 initial_conditions[key] = float(request.form[key])
 
         # シミュレーションの実行
-        positions1, positions2, stop_time1, stop_time2, collision_points = run_simulation(
+        positions1, positions2, rps1_timeline, rps2_timeline, stop_time1, stop_time2, collision_points = run_simulation(
             object1, object2,
             np.array([initial_conditions["pos1_x"], initial_conditions["pos1_y"]]),
             np.array([initial_conditions["pos2_x"], initial_conditions["pos2_y"]]),
@@ -97,6 +97,8 @@ def home():
                                show_simulation=show_simulation,
                                frames1=frames1,
                                frames2=frames2,
+                               rps1_timeline=rps1_timeline,
+                               rps2_timeline=rps2_timeline,
                                collision_points=collision_points,
                                duration=duration,
                                scale=scale,

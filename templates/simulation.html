@@ -41,11 +41,8 @@
           100%{ transform:rotate(360deg); }
         }
         @keyframes darken{
-          100%{ background-color: black; }
+          100%{ background-color: rgba(0, 0, 0, 0.8) }
         }
-       .object-inner.loser{
-          animation:0.8s linear infinite rotation, 5s linear infinite rotation {{ loser_stop_time }}s, 0.1s darken forwards {{ loser_stop_time }}s;
-       }
        .object1 {
          background-color: red;
          width: {{ diameter1 }}px;
@@ -64,6 +61,31 @@
        @keyframes move2 {
            {{ frames2 }}
        }
+
+      {% if rps1_timeline is defined %}
+        .object1 > .object-inner{
+          animation:
+          1s linear infinite rotation 0s
+          {% for t, rps in rps1_timeline.items() %}
+              ,{{ 1.0 / rps }}s linear infinite rotation {{ t }}s
+            {% endfor %}
+          {% if winner == 2 %}
+            ,0.1s darken forwards {{ loser_stop_time }}s
+          {% endif %}
+      }
+      {% endif %}
+      {% if rps2_timeline is defined %}
+        .object2 > .object-inner{
+          animation:
+          1s linear infinite rotation 0s
+          {% for t, rps in rps2_timeline.items() %}
+            ,{{ 1.0 / rps }}s linear infinite rotation {{ t }}s
+          {% endfor %}
+          {% if winner == 1 %}
+            ,0.1s darken forwards {{ loser_stop_time }}s
+          {% endif %}
+        }
+       {% endif %}
 
         #drawingArea {
             width: 100%

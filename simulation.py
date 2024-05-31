@@ -6,6 +6,8 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
     times = np.arange(0, simulation_time, time_step)
     positions1 = []
     positions2 = []
+    rps1_timeline = {}
+    rps2_timeline = {}
     stop_time1 = None
     stop_time2 = None
     collision_points = []
@@ -55,6 +57,8 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
             # radiusに対するmassが重いほど減衰率が低くなる
             rps1 = rps1 * (1 - decay1 * radius1 / mass1)
             rps2 = rps2 * (1 - decay2 * radius2 / mass2)
+            rps1_timeline[t] = rps1
+            rps2_timeline[t] = rps2
 
             restitution1 = restitution1 * (rps1 / object1.rps)
             restitution2 = restitution2 * (rps2 / object2.rps)
@@ -67,4 +71,4 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
             if stop_time1 is not None and stop_time2 is not None:
                 break
 
-    return positions1, positions2, stop_time1, stop_time2, collision_points
+    return positions1, positions2, rps1_timeline, rps2_timeline, stop_time1, stop_time2, collision_points
