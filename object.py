@@ -21,8 +21,8 @@ class Wall:
         self.position = position
         self.normal_vector = normal_vector
 
-    def detect_collision(self, radius, position):
-        return np.dot(self.normal_vector, (position - self.position)) / np.linalg.norm(self.normal_vector) < radius
+    def detect_collision(self, radius, position, velocity):
+        return np.dot(self.normal_vector, (position - self.position)) / np.linalg.norm(self.normal_vector) < radius and np.dot(self.normal_vector, velocity) < 0
 
     def reflect(self, vector):
         return vector - self.normal_vector * 2 * np.dot(self.normal_vector, vector) / np.dot(self.normal_vector, self.normal_vector)

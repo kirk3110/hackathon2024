@@ -28,7 +28,7 @@ def home():
         "vel2_x": 3.0,
         "vel2_y": 4.0,
         "simulation_time": 60.0,
-        "time_step": 0.1,
+        "time_step": 0.05,
         "decay": 0.99
     }
     default_object = Object(1.5, 0.5, 0.98, 1.0, 15.0)
