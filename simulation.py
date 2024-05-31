@@ -75,8 +75,8 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
                 rps2 = rps2 * wall_damping
 
         # 回転の自然減衰 半径に依存 0にはならない
-            rps1 = max(rps1 - radius1 * natural_damping * time_step, 0.01)
-            rps2 = max(rps2 - radius2 * natural_damping * time_step, 0.01)
+        rps1 = max(rps1 - radius1 * natural_damping * time_step, 0.01)
+        rps2 = max(rps2 - radius2 * natural_damping * time_step, 0.01)
 
         # 先にrpsが0になった方が負け
         if rps1 <= 0.03 and stop_time1 is None:
