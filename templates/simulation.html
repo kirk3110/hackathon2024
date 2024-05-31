@@ -10,59 +10,78 @@
       crossorigin="anonymous"
     />
     <style>
-       html,body {
-           height: 100%;
-           background-color: #f0f0f0;
-       }
-       .simulation-container {
-         position: relative;
-         height: 600px;
-         width: 600px;
-         background-color: #f0f0f0;
-         overflow: hidden;
-         display: block;
-       }
-
-       .object1, .object2 {
-         position: absolute;
-         border-radius: 50%;
-       }
-       .object-inner {
-          width: 100%;
+      html,body {
           height: 100%;
-          border: dashed;
-          border-width: 8px;
-          border-radius: 50%;
-          border-color: rgba(255, 255, 255, 0.7);
-          animation:0.8s linear infinite rotation;
-        }
-        @keyframes rotation{
-          0%{ transform:rotate(0); }
-          100%{ transform:rotate(360deg); }
-        }
-        @keyframes darken{
-          100%{ background-color: rgba(0, 0, 0, 0.8) }
-        }
-       .object1 {
-         background-color: red;
-         width: {{ diameter1 }}px;
-         height: {{ diameter1 }}px;
-         animation: move1 {{ duration }}s linear forwards;
-       }
-       .object2 {
-         background-color: blue;
-         width: {{ diameter2 }}px;
-         height: {{ diameter2 }}px;
-         animation: move2 {{ duration }}s linear forwards;
-       }
-       @keyframes move1 {
-           {{ frames1 }}
-       }
-       @keyframes move2 {
-           {{ frames2 }}
-       }
+          background-color: #f0f0f0;
+      }
+      .simulation-container {
+        position: relative;
+        height: 600px;
+        width: 600px;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        display: block;
+      }
+      #drawingArea {
+          width: 100%
+          height: 100%
+      }
+      #velocityArrow {
+          fill: lime;
+      }
+      .wall {
+        fill: rgba(255, 128, 255, 1.0)
+      }
+      #rewardButton {
+        display: none;
+      }
 
-      {% if rps1_timeline is defined %}
+      .message {
+        position: absolute;
+        top: 240px;
+        left: 230px;
+        font-size: 24px;
+      }
+      {% if show_simulation %}
+        .object1, .object2 {
+          position: absolute;
+          border-radius: 50%;
+        }
+        .object-inner {
+            width: 100%;
+            height: 100%;
+            border: dashed;
+            border-width: 8px;
+            border-radius: 50%;
+            border-color: rgba(255, 255, 255, 0.7);
+            animation:0.8s linear infinite rotation;
+          }
+          @keyframes rotation{
+            0%{ transform:rotate(0); }
+            100%{ transform:rotate(360deg); }
+          }
+          @keyframes darken{
+            100%{ background-color: rgba(0, 0, 0, 0.8) }
+          }
+        .object1 {
+          background-color: #3498db;
+          width: {{ diameter1 }}px;
+          height: {{ diameter1 }}px;
+          animation: move1 {{ duration }}s linear forwards;
+        }
+        .object2 {
+          background-color: #e74c3c;
+          width: {{ diameter2 }}px;
+          height: {{ diameter2 }}px;
+          animation: move2 {{ duration }}s linear forwards;
+        }
+        @keyframes move1 {
+            {{ frames1 }}
+        }
+        @keyframes move2 {
+            {{ frames2 }}
+        }
+
         .object1 > .object-inner{
           animation:
           1s linear infinite rotation 0s
@@ -72,9 +91,7 @@
           {% if winner == 2 %}
             ,0.1s darken forwards {{ loser_stop_time }}s
           {% endif %}
-      }
-      {% endif %}
-      {% if rps2_timeline is defined %}
+        }
         .object2 > .object-inner{
           animation:
           1s linear infinite rotation 0s
@@ -85,54 +102,66 @@
             ,0.1s darken forwards {{ loser_stop_time }}s
           {% endif %}
         }
-       {% endif %}
 
-        #drawingArea {
-            width: 100%
-            height: 100%
+        {% for collision_point in collision_points %}
+          {# collision_point: (time, pos) #}
+          .spark{{ loop.index }} {
+            border-radius: 50%;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: rgba(255, 255, 0, 0.0);
+            top: {{ collision_point[1][1] * scale + (diameter1 + diameter2) / 2 / 2 }}px;
+            left: {{ collision_point[1][0] * scale + (diameter1 + diameter2) / 2 / 2  }}px;
+            animation: spark 1s;
+            animation-fill-mode: forwards;
+            animation-delay: {{ collision_point[0] }}s;
+            animation-direction: normal;
+          }
+        {% endfor %}
+        @keyframes spark {
+          0% {
+            transform:scale(0);
+            background: rgba(255, 0, 255, 0.8);
+          }
+          100% {
+            transform:scale(1000);
+            background: rgba(255, 255, 125, 0.0);
+          }
         }
-        .wall {
-          fill: rgba(255, 128, 255, 1.0)
+        .bar-container {
+          width: 100%;
+          height: 50px;
+          position: relative;
+          background-color: #f0f0f0;
+          overflow: hidden;
         }
-        #velocityArrow {
-            fill: lime;
-        }
-        #rewardButton {
-          display: none;
+        .bar1 {
+          background-color: #3498db;
+          height: 50%;
+          animation: rps1 {{ duration  }}s;
         }
 
-      .message {
-         position: absolute;
-         top: 240px;
-         left: 230px;
-         font-size: 24px;
-      }
-      {% for collision_point in collision_points %}
-        {# collision_point: (time, pos) #}
-        .spark{{ loop.index }} {
-          border-radius: 50%;
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          background: rgba(255, 255, 0, 0.0);
-          top: {{ collision_point[1][1] * scale + (diameter1 + diameter2) / 2 / 2 }}px;
-          left: {{ collision_point[1][0] * scale + (diameter1 + diameter2) / 2 / 2  }}px;
-          animation: spark 1s;
-          animation-fill-mode: forwards;
-          animation-delay: {{ collision_point[0] }}s;
-          animation-direction: normal;
+        .bar2 {
+            background-color: #e74c3c;
+            height: 50%;
+            animation: rps2 {{ duration  }}s;
         }
-      {% endfor %}
-      @keyframes spark {
-        0% {
-          transform:scale(0);
-          background: rgba(255, 0, 255, 0.8);
+
+        @keyframes rps1 {
+          0% {width: 100%;}
+          {% for t, rps in rps1_timeline.items() %}
+            {{ t / duration * 100 }}% {width: {{ rps / 20 * 100 }}%;}
+          {% endfor %}
         }
-        100% {
-          transform:scale(1000);
-          background: rgba(255, 255, 125, 0.0);
+        @keyframes rps2bar {
+          0% {width: 100%;}
+          {% for t, rps in rps2_timeline.items() %}
+            {{ t / duration * 100 }}% {width: {{ rps / 20 * 100 }}%;}
+          {% endfor %}
         }
-      }  </style>
+      {% endif %}
+    </style>
   </head>
   <body>
     <div class="container">
@@ -275,6 +304,10 @@
               {% for collision_point in collision_points %}
                 <div class="spark{{ loop.index }}"></div>
               {% endfor %}
+            </div>
+            <div class="bar-container">
+                <div class="bar bar1"></div>
+                <div class="bar bar2"></div>
             </div>
           </div>
         </div>
