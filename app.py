@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import numpy as np
 
 from custom_part import CustomPart
-from object import Object
+from object import Object, Wall
 from simulation import run_simulation
 
 app = Flask(__name__)
@@ -44,6 +44,12 @@ def home():
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
 
+    walls = []
+    walls.append(Wall(np.array([5, 0]), np.array([0, 1])))
+    walls.append(Wall(np.array([0, 5]), np.array([1, 0])))
+    walls.append(Wall(np.array([5, 10]), np.array([0, -1])))
+    walls.append(Wall(np.array([10, 5]), np.array([-1, 0])))
+
     if request.method == 'POST':
         show_simulation = True
         # フォームからデータを取得し、initial_conditionsを更新
@@ -59,7 +65,9 @@ def home():
             np.array([initial_conditions["vel1_x"], initial_conditions["vel1_y"]]),
             np.array([initial_conditions["vel2_x"], initial_conditions["vel2_y"]]),
             initial_conditions["simulation_time"], initial_conditions["time_step"],
-            initial_conditions["decay"])
+            initial_conditions["decay"],
+            walls
+        )
 
         if stop_time1 is None and stop_time2 is None or stop_time1 == stop_time2:
             winner = None
@@ -69,21 +77,21 @@ def home():
             winner = 1
 
         # アニメーションのキーフレームを生成
-        def generate_keyframes(positions, duration, scale):
+        def generate_keyframes(positions, duration, scale, radius):
             keyframes = ""
             num_positions = len(positions)
             for i, pos in enumerate(positions):
                 # 各キーフレームの時間を計算
                 time = (i / (num_positions - 1)) * duration
                 percentage = (time / duration) * 100
-                keyframes += f"{percentage:.2f}% {{ left: {pos[0] * scale}px; top: {pos[1] * scale}px; }}\n"
-            keyframes += f"100% {{ left: {positions[-1][0] * scale}px; top: {positions[-1][1] * scale}px; }}"
+                keyframes += f"{percentage:.2f}% {{ left: {(pos[0] - radius) * scale}px; top: {(pos[1] - radius) * scale}px; }}\n"
+            keyframes += f"100% {{ left: {(positions[-1][0] - radius) * scale}px; top: {(positions[-1][1] - radius) * scale}px; }}"
             return keyframes
 
         duration = max(stop_time1, stop_time2) if stop_time1 and stop_time2 else \
         initial_conditions["simulation_time"]
-        frames1 = generate_keyframes(positions1, duration, scale)
-        frames2 = generate_keyframes(positions2, duration, scale)
+        frames1 = generate_keyframes(positions1, duration, scale, object1.radius)
+        frames2 = generate_keyframes(positions2, duration, scale, object2.radius)
 
         return render_template('simulation.html',
                                show_simulation=show_simulation,
@@ -98,7 +106,9 @@ def home():
                                diameter2=object2.radius*2*scale,
                                winner=winner,
                                loser_stop_time = min(stop_time1 or duration, stop_time2 or duration),
-                               initial_conditions=initial_conditions)
+                               initial_conditions=initial_conditions,
+                               walls = walls
+        )
 
     return render_template('simulation.html',
                            show_simulation=show_simulation,
@@ -107,7 +117,9 @@ def home():
                            scale=scale,
                            object1=object1.map(),
                            object2=object2.map(),
-                           initial_conditions=initial_conditions)
+                           initial_conditions=initial_conditions,
+                           walls = walls
+    )
 
 
 # 報酬選択画面
