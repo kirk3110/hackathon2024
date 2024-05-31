@@ -22,6 +22,9 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
     rps1 = object1.rps
     rps2 = object2.rps
 
+    k = 9.81*math.sin(math.radians(30))  #重力加速度(平面方向)
+    pos0 = np.array([5.0, 5.0]) #原点座標
+
     for t in times:
         positions1.append(pos1.copy())
         positions2.append(pos2.copy())
@@ -29,22 +32,22 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
         pos1 += vel1 * time_step  # 位置の更新
         pos2 += vel2 * time_step
 
-        vel1 = vel1 * decay * decay1  # 摩擦力を速度減衰で再現 共通係数 * 個別係数
-        vel2 = vel2 * decay * decay2
+        acc1 = - decay * decay1 * vel1 / np.linalg.norm(vel1)  # 摩擦力を速度減衰で再現 共通係数 * 個別係数
+        acc2 = - decay * decay2 * vel2 / np.linalg.norm(vel2)
 
+        acc1 += k * (pos0 - pos1)  #原点方向の加速度
+        acc2 += k * (pos0 - pos2) 
+
+        vel1 = vel1 + acc1 * time_step #速度更新 
+        vel2 = vel2 + acc2 * time_step
+            
+        # 壁の衝突
         for wall in walls:
             if wall.detect_collision(radius1, pos1):
                 vel1 = wall.reflect(vel1) * restitution1
             if wall.detect_collision(radius2, pos2):
                 vel2 = wall.reflect(vel2) * restitution2
 
-        k = 9.81*math.sin(math.radians(10))  #重力加速度(平面方向)
-        pos0 = np.array([5.0, 5.0]) #原点座標
-        acc1 = k * (pos0 - pos1)  #原点方向の加速度
-        vel1 = vel1 + acc1 * time_step #速度更新 
-        acc2 = k * (pos0 - pos2) 
-        vel2 = vel2 + acc2 * time_step
-            
         if np.linalg.norm(pos1 - pos2) <= (radius1 + radius2):  # 衝突判定
             # 完全弾性衝突の速度更新
             v1, v2 = vel1.copy(), vel2.copy()
