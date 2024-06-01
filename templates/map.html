@@ -100,15 +100,17 @@
     if (next_node_ids.includes(node_id)) {
       // リンクを有効にする
       node.addEventListener('click', () => {
-        fetch(`/move/${node_id}`, {
+        fetch(`/map`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({}),
+          body: JSON.stringify({
+            next_node_id: node_id,
+          }),
         }).then(response => {
           if (response.ok) {
-            window.location.href = '/';
+            window.location.href = '/simulation';
           }
         });
       });

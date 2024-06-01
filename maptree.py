@@ -1,5 +1,4 @@
 import random
-from collections import defaultdict
 
 
 class MapTree:
@@ -45,6 +44,15 @@ class MapTree:
             'current_step': self.current_step,
             'current_next_node_ids': self.current_next_node_ids
         }
+
+    @staticmethod
+    def from_map(map_):
+        tree = {int(step): {int(node_id): MapTree.Node(int(node['node_id']),
+                                                       node['arrows_to_next'],
+                                                       node['node_type'])
+                            for node_id, node in nodes.items()}
+                for step, nodes in map_['tree'].items()}
+        return MapTree(current_node_id=map_['current_node_id'], tree=tree)
 
     # ランダムマップを生成するファクトリ関数
     @staticmethod

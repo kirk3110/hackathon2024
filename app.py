@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import numpy as np
 
 from custom_part import CustomPart
+from enemy import Enemy
 from maptree import MapTree
 from object import Object, Wall
 from simulation import run_simulation
@@ -20,23 +21,23 @@ def index():
 
 @app.route('/map', methods=['GET', 'POST'])
 def map():
-    if 'object1' in session:
-        object1 = Object(**session['object1'])
-    else:
-        # セッションにオブジェクトがない場合は最初に戻る
-        return redirect(url_for('index'))
+    if 'object1' not in session:
+        # セッションにオブジェクトがない場合は新規作成
+        session['object1'] = Object(1.5, 0.5, 0.98, 1.0, 15.0).map()
 
     if 'map_tree' in session:
-        map_tree = MapTree(**session['map_tree'])
+        map_tree = MapTree.from_map(session['map_tree'])
     else:
         map_tree = MapTree.create_map_tree()
         session['map'] = map_tree.map()
 
     if request.method == 'POST':
-        data = request.get_json()
-        object1.update(data)
-        session['object1'] = object1.map()
-        return 'OK'
+        next_node_id = request.get_json()['next_node_id']
+        map_tree.set_current_node(next_node_id)
+        session['map_tree'] = map_tree.map()
+        session['enemy'] = Enemy.get_random_enemy(map_tree.current_step // 2 + 1).map()
+
+        return redirect(url_for('simulation'))
 
     return render_template('map.html',
                            map_tree=map_tree.map())
@@ -61,16 +62,22 @@ def simulation():
         "time_step": 0.05,
         "decay": 0.99
     }
-    default_object = Object(1.5, 0.5, 0.98, 1.0, 15.0)
     if 'object1' in session:
         try:
             object1 = Object(**session['object1'])
         except TypeError:
-            object1 = default_object
+            return redirect(url_for('index'))
     else:
-        object1 = default_object
-    session['object1'] = object1.map()
-    object2 = Object(1.0, 0.5, 0.98, 1.0, 10.0)
+        return redirect(url_for('index'))
+    if 'enemy' in session:
+        try:
+            enemy = Enemy.from_map(session['enemy'])
+            object2 = enemy.obj
+        except TypeError:
+            return redirect(url_for('index'))
+    else:
+        return redirect(url_for('index'))
+
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
 
