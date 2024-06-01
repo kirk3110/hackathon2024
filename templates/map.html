@@ -62,9 +62,7 @@
           {% set node = step[step_i*10 + td_i//2] %}
           <td class="node">
             <a>
-              <div class="node-circle {% if node.node_id == map_tree.current_node_id %}current-node{% endif %}" id="node_{{ node.node_id }}">
-                {{ node.node_id }}
-              </div>
+              <div class="node-circle {% if node.node_id == map_tree.current_node_id %}current-node{% endif %}" id="node_{{ node.node_id }}"/>
             </a>
           </td>
         {% else %}
