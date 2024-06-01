@@ -35,7 +35,7 @@ def map():
         next_node_id = request.get_json()['next_node_id']
         map_tree.set_current_node(next_node_id)
         session['map_tree'] = map_tree.map()
-        session['enemy'] = Enemy.get_random_enemy(map_tree.current_step // 2 + 1).map()
+        session['enemy'] = Enemy.get_random_enemy((map_tree.current_step+1) // 2).map()
 
         return redirect(url_for('simulation'))
 
