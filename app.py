@@ -66,17 +66,17 @@ def simulation():
         try:
             object1 = Object(**session['object1'])
         except TypeError:
-            return redirect(url_for('index'))
+            return redirect(url_for('reset'))
     else:
-        return redirect(url_for('index'))
+        return redirect(url_for('reset'))
     if 'enemy' in session:
         try:
             enemy = Enemy.from_map(session['enemy'])
             object2 = enemy.obj
         except TypeError:
-            return redirect(url_for('index'))
+            return redirect(url_for('reset'))
     else:
-        return redirect(url_for('index'))
+        return redirect(url_for('reset'))
 
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
