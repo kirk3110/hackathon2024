@@ -4,6 +4,8 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import numpy as np
 
 from custom_part import CustomPart
+from enemy import Enemy
+from maptree import MapTree
 from object import Object, Wall
 from simulation import run_simulation
 
@@ -12,8 +14,37 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
+@app.route('/map', methods=['GET', 'POST'])
+def map():
+    if 'object1' not in session:
+        # セッションにオブジェクトがない場合は新規作成
+        session['object1'] = Object(1.5, 0.5, 0.98, 1.0, 15.0).map()
+
+    if 'map_tree' in session:
+        map_tree = MapTree.from_map(session['map_tree'])
+    else:
+        map_tree = MapTree.create_map_tree()
+        session['map'] = map_tree.map()
+
+    if request.method == 'POST':
+        next_node_id = request.get_json()['next_node_id']
+        map_tree.set_current_node(next_node_id)
+        session['map_tree'] = map_tree.map()
+        session['enemy'] = Enemy.get_random_enemy(map_tree.current_step // 2 + 1).map()
+
+        return redirect(url_for('simulation'))
+
+    return render_template('map.html',
+                           map_tree=map_tree.map())
+
+
+@app.route('/simulation', methods=['GET', 'POST'])
+def simulation():
     # 初期状態では描画しない
     show_simulation = False
 
@@ -31,16 +62,22 @@ def home():
         "time_step": 0.05,
         "decay": 0.99
     }
-    default_object = Object(1.5, 0.5, 0.98, 1.0, 15.0)
     if 'object1' in session:
         try:
             object1 = Object(**session['object1'])
         except TypeError:
-            object1 = default_object
+            return redirect(url_for('reset'))
     else:
-        object1 = default_object
-    session['object1'] = object1.map()
-    object2 = Object(1.0, 0.5, 0.98, 1.0, 10.0)
+        return redirect(url_for('reset'))
+    if 'enemy' in session:
+        try:
+            enemy = Enemy.from_map(session['enemy'])
+            object2 = enemy.obj
+        except TypeError:
+            return redirect(url_for('reset'))
+    else:
+        return redirect(url_for('reset'))
+
     scale = 50  # 位置のスケーリングファクター（ピクセル変換用）
     winner = None
 
@@ -89,9 +126,11 @@ def home():
             return keyframes
 
         duration = max(stop_time1, stop_time2) if stop_time1 and stop_time2 else \
-        initial_conditions["simulation_time"]
-        frames1 = generate_keyframes(positions1, duration, scale, object1.radius)
-        frames2 = generate_keyframes(positions2, duration, scale, object2.radius)
+            initial_conditions["simulation_time"]
+        frames1 = generate_keyframes(positions1, duration, scale,
+                                     object1.radius)
+        frames2 = generate_keyframes(positions2, duration, scale,
+                                     object2.radius)
 
         return render_template('simulation.html',
                                show_simulation=show_simulation,
@@ -104,24 +143,25 @@ def home():
                                scale=scale,
                                object1=object1.map(),
                                object2=object2.map(),
-                               diameter1=object1.radius*2*scale,
-                               diameter2=object2.radius*2*scale,
+                               diameter1=object1.radius * 2 * scale,
+                               diameter2=object2.radius * 2 * scale,
                                winner=winner,
-                               loser_stop_time = min(stop_time1 or duration, stop_time2 or duration),
+                               loser_stop_time=min(stop_time1 or duration,
+                                                   stop_time2 or duration),
                                initial_conditions=initial_conditions,
-                               walls = walls
-        )
+                               walls=walls
+                               )
 
     return render_template('simulation.html',
                            show_simulation=show_simulation,
-                           diameter1=object1.radius*2*scale,
-                           diameter2=object2.radius*2*scale,
+                           diameter1=object1.radius * 2 * scale,
+                           diameter2=object2.radius * 2 * scale,
                            scale=scale,
                            object1=object1.map(),
                            object2=object2.map(),
                            initial_conditions=initial_conditions,
-                           walls = walls
-    )
+                           walls=walls
+                           )
 
 
 # 報酬選択画面
@@ -139,14 +179,15 @@ def reward():
                       radius_value=0.5, radius_calculation='multiple'),
         5: CustomPart("Full Steam Ahead", "Improve velocity decay by 10%.",
                       improve_decay_value=0.1),
-        6: CustomPart("Rage Reflection", "Increase restitution by 10%. (Maximum 2.0)",
+        6: CustomPart("Rage Reflection",
+                      "Increase restitution by 10%. (Maximum 2.0)",
                       restitution_value=0.1, restitution_calculation='add')
     }
     if 'object1' in session:
         object1 = Object(**session['object1'])
     else:
         # セッションにオブジェクトがない場合は最初に戻る
-        return redirect(url_for('home'))
+        return redirect(url_for('index'))
 
     # GETリクエストの場合、報酬としてカスタムパーツを表示
     if request.method == 'GET':
@@ -155,14 +196,20 @@ def reward():
         selected_parts_keys = random.sample(list(custom_parts.keys()), 3)
         return render_template('reward.html',
                                reward_1_id=selected_parts_keys[0],
-                               reward_1_title=custom_parts[selected_parts_keys[0]].title,
-                               reward_1_text=custom_parts[selected_parts_keys[0]].text,
+                               reward_1_title=custom_parts[
+                                   selected_parts_keys[0]].title,
+                               reward_1_text=custom_parts[
+                                   selected_parts_keys[0]].text,
                                reward_2_id=selected_parts_keys[1],
-                               reward_2_title=custom_parts[selected_parts_keys[1]].title,
-                               reward_2_text=custom_parts[selected_parts_keys[1]].text,
+                               reward_2_title=custom_parts[
+                                   selected_parts_keys[1]].title,
+                               reward_2_text=custom_parts[
+                                   selected_parts_keys[1]].text,
                                reward_3_id=selected_parts_keys[2],
-                               reward_3_title=custom_parts[selected_parts_keys[2]].title,
-                               reward_3_text=custom_parts[selected_parts_keys[2]].text,
+                               reward_3_title=custom_parts[
+                                   selected_parts_keys[2]].title,
+                               reward_3_text=custom_parts[
+                                   selected_parts_keys[2]].text,
                                )
 
     # POSTリクエストの場合は、選択されたカスタムパーツを適用
@@ -173,13 +220,13 @@ def reward():
         session['object1'] = object1.map()
 
         # シミュレーション画面にリダイレクト
-        return redirect(url_for('home'))
+        return redirect(url_for('simulation'))
 
 
-@app.route('/restart')
+@app.route('/reset')
 def clear_session():
     session.clear()
-    return redirect(url_for('home'))
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
