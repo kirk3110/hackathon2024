@@ -79,6 +79,6 @@ CUSTOM_PARTS_DICT = {
                   "Increase restitution by 10%. (Maximum 2.0)",
                   "common",
                   restitution_value=1.1, restitution_calculation='multiple'),
-    7: CustomPart("Spin Engine", "Increase rotation speed by 50%. (Maximum 20)", "rare",
+    7: CustomPart("Spin Engine", "Increase rotation speed by 50%. (Maximum 40)", "rare",
                   rps_value=1.5, rps_calculation='multiple'),
 }
