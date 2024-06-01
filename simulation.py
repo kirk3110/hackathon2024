@@ -85,6 +85,12 @@ def run_simulation(object1, object2, pos1, pos2, vel1, vel2, simulation_time, ti
             stop_time2 = t
         if stop_time1 is not None and stop_time2 is not None:
             break
+        elif stop_time1 is not None and t - stop_time1 > 3:
+            stop_time2 = t
+            break
+        elif stop_time2 is not None and t - stop_time2 > 3:
+            stop_time1 = t
+            break
 
     rps1_timeline[stop_time1 or simulation_time] = rps1
     rps2_timeline[stop_time2 or simulation_time] = rps2
