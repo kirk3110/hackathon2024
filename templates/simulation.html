@@ -340,7 +340,7 @@
         animationsCompleted += 1;
         if (animationsCompleted === 2) {
           {% if winner is defined and winner != None %}
-            document.getElementById("message").textContent = "Object" + {{ winner }} + " win!";
+            document.getElementById("message").textContent = "You " + "{{ "Win!" if winner == 1 else "Lose..." }}";
           {% else %}
             document.getElementById("message").textContent = "Draw";
           {% endif %}
