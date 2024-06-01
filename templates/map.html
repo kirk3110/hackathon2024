@@ -21,8 +21,15 @@
       border-radius: 50%;
       border: 1px solid black;
     }
-    .node-circle.current {
+    .node-circle.current-node {
       background-color: lightblue;
+    }
+    .node-circle.next-node {
+      background-color: lightgreen;
+      cursor: pointer;
+    }
+    .node-circle.next-node:hover {
+      background-color: lightyellow;
     }
     .blank {
       width: 50px;
@@ -51,48 +58,63 @@
     {% set step = map_tree.tree[step_i] %}
     <tr>
       {% for td_i in range(9) %}
-        {% set exist_node = [] %}
-        {% for node in step %}
-          {% if td_i == node.node_id % 10 * 2 %}
-            <td class="node">
-              <div class="node-circle {% if node.node_id == map_tree.current_node_id %}current{% endif %}" />
-            </td>
-            {% set _ = exist_node.append(True) %}
-          {% endif %}
-        {% endfor %}
-        {% if True not in exist_node %}
+        {% if td_i % 2 == 0 and step[step_i*10 + td_i//2] is defined %}
+          {% set node = step[step_i*10 + td_i//2] %}
+          <td class="node">
+            <a>
+              <div class="node-circle {% if node.node_id == map_tree.current_node_id %}current-node{% endif %}" id="node_{{ node.node_id }}">
+                {{ node.node_id }}
+              </div>
+            </a>
+          </td>
+        {% else %}
           <td class="node"><div class="blank"></div></td>
         {% endif %}
       {% endfor %}
     </tr>
     <tr>
       {% for td_i in range(9) %}
-        {% set exist_arrow = [] %}
-        {% for node in step %}
-          {% if td_i + 1 == node.node_id % 10 * 2 %}
-            {% if "left" in node.arrows_to_next %}
-              <td><div class="arrow">↙</div></td>
-              {% set _ = exist_arrow.append(True) %}
-            {% endif %}
-          {% elif td_i == node.node_id % 10 * 2 %}
-            {% if "straight" in node.arrows_to_next %}
-              <td><div class="arrow">↓</div></td>
-              {% set _ = exist_arrow.append(True) %}
-            {% endif %}
-          {% elif td_i - 1 == node.node_id % 10 * 2 %}
-            {% if "right" in node.arrows_to_next %}
-              <td><div class="arrow">↘</div></td>
-              {% set _ = exist_arrow.append(True) %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        {% if True not in exist_arrow %}
-          <td></td>
+        {% set exists_arrow = [] %}
+        {% if td_i %2 == 1 and step[step_i*10 + (td_i+1)//2] is defined and "left" in step[step_i*10 + (td_i+1)//2].arrows_to_next %}
+          <td><div class="arrow">↙</div></td>
+          {% set exists_arrow = exists_arrow.append(True) %}
+        {% elif td_i %2 == 0 and step[step_i*10 + (td_i)//2] is defined and "straight" in step[step_i*10 + (td_i)//2].arrows_to_next %}
+          <td><div class="arrow">↓</div></td>
+          {% set exists_arrow = exists_arrow.append(True) %}
+        {% elif td_i %2 == 1 and step[step_i*10 + (td_i-1)//2] is defined and "right" in step[step_i*10 + (td_i-1)/2].arrows_to_next %}
+          <td><div class="arrow">↘</div></td>
+        {% else %}
+          <td><div></div></td>
         {% endif %}
       {% endfor %}
     </tr>
   {% endfor %}
 </table>
 </div>
+<script>
+  // current_node_idのnext_node_idsだけリンクを有効にする
+  const next_node_ids = {{ map_tree.current_next_node_ids }};
+  const nodes = document.querySelectorAll('.node-circle');
+  nodes.forEach(node => {
+    const node_id = parseInt(node.id.split('_')[1]);
+    if (next_node_ids.includes(node_id)) {
+      // リンクを有効にする
+      node.addEventListener('click', () => {
+        fetch(`/move/${node_id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }).then(response => {
+          if (response.ok) {
+            window.location.href = '/';
+          }
+        });
+      });
+      node.classList.add('next-node');
+    }
+  });
+</script>
 </body>
 </html>
