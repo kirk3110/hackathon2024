@@ -168,21 +168,6 @@ def simulation():
 @app.route('/reward', methods=['GET', 'POST'])
 def reward():
     # 一旦決め打ち。いずれファイルかDBから読み込む
-    custom_parts = {
-        1: CustomPart("Gravity Negator", "Half the mass.",
-                      mass_value=0.5, mass_calculation='multiple'),
-        2: CustomPart("Giant Growth", "Double the diameter.",
-                      radius_value=2.0, radius_calculation='multiple'),
-        3: CustomPart("Overencumbered", "Double the mass.",
-                      mass_value=2.0, mass_calculation='multiple'),
-        4: CustomPart("Shrink", "Half the diameter.",
-                      radius_value=0.5, radius_calculation='multiple'),
-        5: CustomPart("Full Steam Ahead", "Improve velocity decay by 10%.",
-                      improve_decay_value=0.1),
-        6: CustomPart("Rage Reflection",
-                      "Increase restitution by 10%. (Maximum 2.0)",
-                      restitution_value=0.1, restitution_calculation='add')
-    }
     if 'object1' in session:
         object1 = Object(**session['object1'])
     else:
@@ -192,30 +177,25 @@ def reward():
     # GETリクエストの場合、報酬としてカスタムパーツを表示
     if request.method == 'GET':
         # カスタムパーツリストからランダムに3つ選択
-        import random
-        selected_parts_keys = random.sample(list(custom_parts.keys()), 3)
+        selected_parts_keys = CustomPart.get_random_keys(3)
+        custom_parts = {key: {
+            "title": CustomPart.get_part_by_id(key).title,
+            "text": CustomPart.get_part_by_id(key).text,
+            "rarity": CustomPart.get_part_by_id(key).rarity
+        } for key in selected_parts_keys}
         return render_template('reward.html',
                                reward_1_id=selected_parts_keys[0],
-                               reward_1_title=custom_parts[
-                                   selected_parts_keys[0]].title,
-                               reward_1_text=custom_parts[
-                                   selected_parts_keys[0]].text,
+                               reward_1=custom_parts[selected_parts_keys[0]],
                                reward_2_id=selected_parts_keys[1],
-                               reward_2_title=custom_parts[
-                                   selected_parts_keys[1]].title,
-                               reward_2_text=custom_parts[
-                                   selected_parts_keys[1]].text,
+                               reward_2=custom_parts[selected_parts_keys[1]],
                                reward_3_id=selected_parts_keys[2],
-                               reward_3_title=custom_parts[
-                                   selected_parts_keys[2]].title,
-                               reward_3_text=custom_parts[
-                                   selected_parts_keys[2]].text,
+                               reward_3=custom_parts[selected_parts_keys[2]],
                                )
 
     # POSTリクエストの場合は、選択されたカスタムパーツを適用
     if request.method == 'POST':
         data = request.get_json()
-        selected_part = custom_parts[int(data['id'])]
+        selected_part = CustomPart.get_part_by_id(int(data['id']))
         selected_part.update(object1)
         session['object1'] = object1.map()
 
