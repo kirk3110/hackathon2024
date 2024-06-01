@@ -15,6 +15,23 @@
       justify-content: center;
       align-items: center;
     }
+    .card {
+      min-width: 150px;
+      min-height: 250px;
+    }
+    .card-body.rare {
+      background: linear-gradient(45deg, #ffcc00, #ffcc00 25%, #ffffff 50%, #ffcc00 75%, #ffcc00);
+      background-size: 400% 400%;
+      animation: shine 1.5s infinite linear;
+    }
+    @keyframes shine {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 100% 50%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -24,34 +41,31 @@
   <div class="row">
     <div class="col-4">
       <div class="card reward" id="reward_1">
-        <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column {% if reward_1.rarity == 'rare' %}rare{% endif %}">
           <input type="hidden" id="reward_1_id" value="{{ reward_1_id }}">
-          <h5 class="card-title">{{ reward_1_title }}</h5>
-          <p class="card-text">{{ reward_1_text }}</p>
-          <a href="/map" class="btn btn-primary">Select</a>
+          <h5 class="card-title">{{ reward_1.title }}</h5>
+          <p class="card-text">{{ reward_1.text }}</p>
+          <a href="/map" class="btn btn-primary mt-auto">Select</a>
         </div>
       </div>
     </div>
     <div class="col-4">
       <div class="card reward" id="reward_2">
-        <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column {% if reward_2.rarity == 'rare' %}rare{% endif %}">
           <input type="hidden" id="reward_2_id" value="{{ reward_2_id }}">
-          <h5 class="card-title">{{ reward_2_title }}</h5>
-          <p class="card-text">{{ reward_2_text }}</p>
-          <a href="/map" class="btn btn-primary">Select</a>
+          <h5 class="card-title">{{ reward_2.title }}</h5>
+          <p class="card-text">{{ reward_2.text }}</p>
+          <a href="/map" class="btn btn-primary mt-auto">Select</a>
         </div>
       </div>
     </div>
     <div class="col-4">
       <div class="card reward" id="reward_3">
-        <img src="https://via.placeholder.com/150" class="card-img-top" alt="...">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column {% if reward_3.rarity == 'rare' %}rare{% endif %}">
           <input type="hidden" id="reward_3_id" value="{{ reward_3_id }}">
-          <h5 class="card-title">{{ reward_3_title }}</h5>
-          <p class="card-text">{{ reward_3_text }}</p>
-          <a href="/map" class="btn btn-primary">Select</a>
+          <h5 class="card-title">{{ reward_3.title }}</h5>
+          <p class="card-text">{{ reward_3.text }}</p>
+          <a href="/map" class="btn btn-primary mt-auto">Select</a>
         </div>
       </div>
     </div>
