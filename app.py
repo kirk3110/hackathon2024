@@ -223,7 +223,7 @@ def reward():
         return redirect(url_for('simulation'))
 
 
-@app.route('/restart')
+@app.route('/reset')
 def clear_session():
     session.clear()
     return redirect(url_for('index'))
