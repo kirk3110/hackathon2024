@@ -16,15 +16,15 @@
       }
       .simulation-container {
         position: relative;
-        height: 600px;
-        width: 600px;
+        height: 500px;
+        width: 500px;
         background-color: #f0f0f0;
         overflow: hidden;
         display: block;
       }
       #drawingArea {
-          width: 100%
-          height: 100%
+          width: 500px;
+          height: 500px;
       }
       #velocityArrow {
           fill: lime;
@@ -39,8 +39,10 @@
       .message {
         position: absolute;
         top: 240px;
-        left: 230px;
+        left: 200px;
+        width: 200px;
         font-size: 24px;
+        text-shadow: #f0f0f0 3px 3px;
       }
       {% if show_simulation %}
         .object1, .object2 {
@@ -284,7 +286,7 @@
           </div>
           <div class="col-12 col-md-6">
             <div id="screen" class="simulation-container m-2">
-              <svg id="drawingArea"width="600" height="600">
+              <svg id="drawingArea">
                 <polygon id="velocityArrow" points="0,0 0,0 0,0" />
                 {% for wall in walls %}
                   <polygon class="wall" points="
@@ -300,7 +302,7 @@
               <div class="object2">
                 <div class="object-inner{{ ' loser' if winner == 1 }}"></div>
               </div>
-              <div id="message" class="message row"></div>
+              <div id="message" class="message row">{{ "Drag to Shot!" if not show_simulation }}</div>
               {% for collision_point in collision_points %}
                 <div class="spark{{ loop.index }}"></div>
               {% endfor %}
@@ -338,7 +340,7 @@
         animationsCompleted += 1;
         if (animationsCompleted === 2) {
           {% if winner is defined and winner != None %}
-            document.getElementById("message").textContent = "Object" + {{ winner }} + " win!";
+            document.getElementById("message").textContent = "You " + "{{ "Win!" if winner == 1 else "Lose..." }}";
           {% else %}
             document.getElementById("message").textContent = "Draw";
           {% endif %}
