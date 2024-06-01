@@ -29,12 +29,12 @@ class CustomPart:
         object_.decay = 1 - (1 - object_.decay) * (1 - self.improve_decay_value)
 
     def update_restitution(self, object_):
-        if self.restitution_calculation == 'add':
-            object_.restitution += self.restitution_value
+        if self.restitution_calculation == 'multiple':
+            object_.restitution = min(2.0, object_.restitution * self.restitution_value)
 
     def update_rps(self, object_):
         if self.rps_calculation == 'multiple':
-            object_.rps *= self.rps_value
+            object_.rps = min(40.0, object_.rps * self.rps_value)
 
     def update(self, object_):
         for attribute, update_method in self.update_methods.items():
@@ -78,7 +78,7 @@ CUSTOM_PARTS_DICT = {
     6: CustomPart("Rage Reflection",
                   "Increase restitution by 10%. (Maximum 2.0)",
                   "common",
-                  restitution_value=0.1, restitution_calculation='add'),
-    7: CustomPart("Spin Engine", "Increase rotation speed by 50%.", "rare",
+                  restitution_value=1.1, restitution_calculation='multiple'),
+    7: CustomPart("Spin Engine", "Increase rotation speed by 50%. (Maximum 20)", "rare",
                   rps_value=1.5, rps_calculation='multiple'),
 }
